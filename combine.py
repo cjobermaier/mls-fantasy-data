@@ -1,5 +1,6 @@
 import requests
 import math
+import csv
 
 
 def load_game_stats():
@@ -175,6 +176,49 @@ def combine_stats(player_id):
     print(f"Total WF Points: {total_wf_points}")
     print(f"Total Combined Points: {total_points}")
 
+     # Prepare data for CSV export (exclude "Game Stats Points" and "Fantasy Stats")
+    data = {
+        'Player ID': fantasy_stats['id'],
+        'Name': f"{fantasy_stats['first_name']} {fantasy_stats['last_name']}",
+        'Cost': fantasy_stats['cost'],
+        'Total Points': fantasy_stats['total_points'],
+        'Average Points': fantasy_stats['avg_points'],
+        'Owned By': fantasy_stats['owned_by'],
+        'High Score': fantasy_stats['high_score'],
+        'Low Score': fantasy_stats['low_score'],
+        'Positions': ', '.join(map(str, fantasy_stats['positions'])),
+        'Total MIN Points': total_min_points,
+        'Total GL Points': total_gl_points,
+        'Total ASS Points': total_ass_points,
+        'Total YC Points': total_yc_points,
+        'Total GC Points': total_gc_points,
+        'Total CS Points': total_cs_points,
+        'Total GS Points': total_gs_points,
+        'Total PS Points': total_ps_points,
+        'Total PM Points': total_pm_points,
+        'Total OG Points': total_og_points,
+        'Total SGS Points': total_sgs_points,
+        'Total FS Points': total_fs_points,
+        'Total PSS Points': total_pss_points,
+        'Total APS Points': total_aps_points,
+        'Total CRS Points': total_crs_points,
+        'Total KP Points': total_kp_points,
+        'Total ASG Points': total_asg_points,
+        'Total SH Points': total_sh_points,
+        'Total CL Points': total_cl_points,
+        'Total INT Points': total_int_points,
+        'Total WF Points': total_wf_points,
+        'Total Combined Points': total_points
+    }
+
+    # Export to CSV
+    with open('player_stats.csv', 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=data.keys())
+        writer.writeheader()
+        writer.writerow(data)
+
+    print(f"Data exported to 'player_stats.csv'")
+    
     return total_points
 
 
