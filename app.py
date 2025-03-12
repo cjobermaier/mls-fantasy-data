@@ -33,6 +33,17 @@ def search_player(data, search_term):
             results.append(player)
     return results
 
+# Pagination and Sorting Logic
+def paginate_data(data, page, per_page=50):
+    """Paginate the data, returning the appropriate page."""
+    start = (page - 1) * per_page
+    end = start + per_page
+    return data[start:end]
+
+def sort_data(data, sort_by, ascending=True):
+    """Sort the data based on a given key and order."""
+    return sorted(data, key=lambda x: x.get(sort_by, ''), reverse=not ascending)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """Render the search page and handle search queries."""
@@ -40,15 +51,29 @@ def index():
     data = load_data_from_url(url)  # Load data from the URL
     
     results = []
-    
+    current_page = request.args.get('page', 1, type=int)
+    sort_by = request.args.get('sort_by', 'id')  # Default sort by 'id'
+    sort_order = request.args.get('sort_order', 'asc')  # Default ascending
+
+    # Sort data based on user input
+    ascending = sort_order == 'asc'
+    sorted_data = sort_data(data, sort_by, ascending)
+
     if request.method == 'POST':
         # Get the search term from the form
         search_term = request.form.get('search_term', '').strip()
         if search_term:
             # Perform the search
             results = search_player(data, search_term)
-    
-    return render_template('index.html', results=results)
+        else:
+            results = sorted_data  # If no search term, show sorted data
+    else:
+        results = sorted_data  # Show sorted data if not a POST request
+
+    # Paginate the results
+    paginated_results = paginate_data(results, current_page)
+
+    return render_template('index.html', results=paginated_results, current_page=current_page, sort_by=sort_by, sort_order=sort_order, total_results=len(results))
 
 if __name__ == '__main__':
     app.run(debug=True)

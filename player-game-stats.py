@@ -27,7 +27,7 @@ def find_player_id(search_value, data):
 search_value = input("Enter the player's name or ID to search: ")
 
 # Load data from the CSV file (replace 'players.csv' with your actual CSV filename)
-data = read_csv_data('players_data.csv')
+data = read_csv_data('players_ids.csv')
 
 # Find the player ID based on the user input
 player_id = find_player_id(search_value, data)  # Pass 'data' here as the second argument
@@ -38,7 +38,7 @@ else:
     print(f"Player '{search_value}' not found.")
 
 # URL for the JSON data from S3
-url = f"https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/stats/players/{player_id}.json?_=1741794986293"
+url = f"https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/stats/players/{player_id}.json?_=1741793495420"
 response = requests.get(url)
 
 # Check if the request was successful 

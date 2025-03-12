@@ -18,12 +18,12 @@
     <table border="1">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Known Name</th>
-                <th>Cost</th>
-                <th>Status</th>
+                <th><a href="?page={{ current_page }}&sort_by=id&sort_order={{ 'desc' if sort_order == 'asc' else 'asc' }}">ID</a></th>
+                <th><a href="?page={{ current_page }}&sort_by=first_name&sort_order={{ 'desc' if sort_order == 'asc' else 'asc' }}">First Name</a></th>
+                <th><a href="?page={{ current_page }}&sort_by=last_name&sort_order={{ 'desc' if sort_order == 'asc' else 'asc' }}">Last Name</a></th>
+                <th><a href="?page={{ current_page }}&sort_by=known_name&sort_order={{ 'desc' if sort_order == 'asc' else 'asc' }}">Known Name</a></th>
+                <th><a href="?page={{ current_page }}&sort_by=cost&sort_order={{ 'desc' if sort_order == 'asc' else 'asc' }}">Cost</a></th>
+                <th><a href="?page={{ current_page }}&sort_by=status&sort_order={{ 'desc' if sort_order == 'asc' else 'asc' }}">Status</a></th>
                 <th>Stats</th>
             </tr>
         </thead>
@@ -82,6 +82,17 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <div>
+        {% if current_page > 1 %}
+        <a href="?page={{ current_page - 1 }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+        {% endif %}
+        <span>Page {{ current_page }} of {{ (total_results // 50) + (1 if total_results % 50 else 0) }}</span>
+        {% if current_page * 50 < total_results %}
+        <a href="?page={{ current_page + 1 }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
+        {% endif %}
+    </div>
     {% else %}
         <p>No results found.</p>
     {% endif %}
