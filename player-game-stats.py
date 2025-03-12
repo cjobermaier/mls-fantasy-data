@@ -41,6 +41,7 @@ else:
 url = f"https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/stats/players/{player_id}.json?_=1741793495420"
 response = requests.get(url)
 
+
 # Check if the request was successful 
 if response.status_code == 200:
     # Load the response data as JSON
@@ -74,5 +75,7 @@ if response.status_code == 200:
         ]
 
     print(players_data)
+    
+
 else:
     print(f"Failed to retrieve data. Status code: {response.status_code}")
