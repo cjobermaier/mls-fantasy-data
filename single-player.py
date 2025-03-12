@@ -2,28 +2,14 @@ import requests
 import math
 import csv
 
-def load_player_ids():
-    # URL for the JSON data from S3 for player info
-    url = "https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/players.json?_=1741793495420"
-    
-    # Fetch the data from the URL
-    response = requests.get(url)
+# mid 3
+# defender 2
+# forward
+# keeper
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        players_data = response.json()
-
-        # Extract player IDs
-        player_ids = [player['id'] for player in players_data]
-        return player_ids
-    else:
-        print(f"Failed to fetch player data, status code: {response.status_code}")
-        return []
-
-
-def load_game_stats(player_identification):
-    # Dynamically generate the URL using player_identification
-    url = f"https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/stats/players/{player_identification}.json?_=1741793495420"
+def load_game_stats():
+    # URL for the JSON data from S3 for game stats
+    url = "https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/stats/players/1672.json?_=1741793495420"
     
     # Fetch the data from the URL
     response = requests.get(url)
@@ -42,24 +28,25 @@ def load_game_stats(player_identification):
                 game_stats.append({'match_id': match_id, 'stats': match_stats})
         return game_stats
     else:
-        print(f"Failed to fetch game stats for player {player_identification}, status code: {response.status_code}")
+        print(f"Failed to fetch data, status code: {response.status_code}")
         return []
 
 
-def load_fantasy_stats(player_identification):
+def load_fantasy_stats():
     # URL for the JSON data from S3 for fantasy stats
-    url = f"https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/players.json?_=1741804692858"
+    url = "https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/players.json?_=1741804692858"
     
     # Fetch the data from the URL
     response = requests.get(url)
 
     # Check if the request was successful
     if response.status_code == 200:
+        # Load the response data as JSON
         players_data = response.json()
 
-        # Find the player's fantasy stats by matching the player ID
+        # Find a specific player's fantasy stats (Example: ID = 1672)
         for player in players_data:
-            if player.get('id') == player_identification:
+            if player.get('id') == 1672:  # Example player ID
                 return {
                     'id': player['id'],
                     'first_name': player.get('first_name', ''),
@@ -73,13 +60,13 @@ def load_fantasy_stats(player_identification):
                     'positions': player.get('positions', [])
                 }
     else:
-        print(f"Failed to fetch fantasy stats data for player {player_identification}, status code: {response.status_code}")
+        print(f"Failed to fetch fantasy stats data, status code: {response.status_code}")
         return {}
 
 
-def combine_stats(player_identification):
-    game_stats = load_game_stats(player_identification)
-    fantasy_stats = load_fantasy_stats(player_identification)
+def combine_stats(player_id):
+    game_stats = load_game_stats()
+    fantasy_stats = load_fantasy_stats()
 
     total_min_points = 0
     total_gl_points = 0
@@ -105,38 +92,22 @@ def combine_stats(player_identification):
     total_wf_points = 0
 
     for game in game_stats:
-        is_midfielder = 'MF' in game['stats'].get('positions', [])
-        goals_conceded = game['stats'].get('GC', 0)
         min_played = game['stats'].get('MIN', 0)
         if min_played <= 60:
             min_points = 1  # 1 point for playing up to 60 minutes
         else:
             min_points = 2  # 2 points for playing over 60 minutes
-    # Goals (GL) - 6 points for defenders or goalkeepers, else 5 points
-        gl_points = game['stats'].get('GL', 0)
-        # Determine if the player is a defender or goalkeeper
-        is_defender_or_goalkeeper = 'DEF' in fantasy_stats['positions'] or 'GK' in fantasy_stats['positions']
-        if is_defender_or_goalkeeper:
-            gl_points = gl_points * 6  # 6 points for defenders/goalkeepers
-        else:
-            gl_points = gl_points * 5  # 5 points for others        
+        gl_points = game['stats'].get('GL', 0) * 5
         ass_points = game['stats'].get('ASS', 0) * 3
         yc_points = game['stats'].get('YC', 0) * -1
-        total_rc_points = game['stats'].get('RC', 0) * -3
         gc_points = game['stats'].get('GC', 0) * -1
         cs_points = game['stats'].get('CS', 0) * 4
-        is_goalkeeper = 'GK' in game['stats'].get('positions', [])
-        if is_goalkeeper:
-            gs_points = game['stats'].get('GS', 0) // 4  # Every 4 saves = 1 point, positive for goalkeepers
-            ps_points = game['stats'].get('PS', 0) * 5  # 5 points for every PS
-
-        else:
-            gs_points = 0  # No points for saves if not a goalkeeper 
-            ps_points = 0      
-        pm_points = game['stats'].get('PM', 0) * -2
+        gs_points = game['stats'].get('GS', 0) * 2
+        ps_points = math.floor(game['stats'].get('PS', 0) / 10)
+        pm_points = game['stats'].get('PM', 0) * -1
         og_points = game['stats'].get('OG', 0) * -2
-        sgs_points = game['stats'].get('SGS', 0) // 4
-        fs_points = game['stats'].get('FS', 0) // 4  # Every 4 fouls = 1 point and rounds down
+        sgs_points = game['stats'].get('SGS', 0) * 1
+        fs_points = game['stats'].get('FS', 0) * -1
         pss_points = math.floor(game['stats'].get('PSS', 0) / 10)
         aps_points = math.floor(game['stats'].get('APS', 0) / 10)
         crs_points = game['stats'].get('CRS', 0) * 1
@@ -145,18 +116,7 @@ def combine_stats(player_identification):
         sh_points = math.floor(game['stats'].get('SH', 0) / 2)
         cl_points = game['stats'].get('CL', 0) * 2
         int_points = game['stats'].get('INT', 0) * 1
-        wf_points = game['stats'].get('WF', 0) // 4 * -1
-        # Check if player played 60 minutes or more and did not concede any goals
-        if min_played >= 60 and goals_conceded == 0:
-            if is_defender_or_goalkeeper:
-                cs_points = 5  # 5 points for defenders or goalkeepers with a clean sheet
-            elif is_midfielder:
-                cs_points = 1  # 1 point for midfielders with a clean sheet
-            else:
-                cs_points = 0  # No points for other positions
-        else:
-            cs_points = 0  # No points if less than 60 minutes or goals conceded
-
+        wf_points = game['stats'].get('WF', 0) * 0.5
 
         total_min_points += min_points
         total_gl_points += gl_points
@@ -187,9 +147,9 @@ def combine_stats(player_identification):
         total_asg_points + total_sh_points + total_cl_points + total_int_points + total_wf_points
     )
 
-    # Print the fantasy stats
-    """ if fantasy_stats:
-        print(f"Fantasy Stats for Player {player_identification}:")
+    # Print the fantasy stats (this is where you requested to see the data)
+    if fantasy_stats:
+        print("Fantasy Stats:")
         print(f"Player ID: {fantasy_stats['id']}")
         print(f"Name: {fantasy_stats['first_name']} {fantasy_stats['last_name']}")
         print(f"Cost: {fantasy_stats['cost']}")
@@ -198,9 +158,33 @@ def combine_stats(player_identification):
         print(f"Owned By: {fantasy_stats['owned_by']}%")
         print(f"High Score: {fantasy_stats['high_score']}")
         print(f"Low Score: {fantasy_stats['low_score']}")
-        print(f"Positions: {fantasy_stats['positions']}") """
+        print(f"Positions: {fantasy_stats['positions']}")
 
-    # Prepare data for CSV export
+    print(f"\nGame Stats Points:")
+    print(f"Total MIN Points: {total_min_points}")
+    print(f"Total GL Points: {total_gl_points}")
+    print(f"Total ASS Points: {total_ass_points}")
+    print(f"Total YC Points: {total_yc_points}")
+    print(f"Total GC Points: {total_gc_points}")
+    print(f"Total CS Points: {total_cs_points}")
+    print(f"Total GS Points: {total_gs_points}")
+    print(f"Total PS Points: {total_ps_points}")
+    print(f"Total PM Points: {total_pm_points}")
+    print(f"Total OG Points: {total_og_points}")
+    print(f"Total SGS Points: {total_sgs_points}")
+    print(f"Total FS Points: {total_fs_points}")
+    print(f"Total PSS Points: {total_pss_points}")
+    print(f"Total APS Points: {total_aps_points}")
+    print(f"Total CRS Points: {total_crs_points}")
+    print(f"Total KP Points: {total_kp_points}")
+    print(f"Total ASG Points: {total_asg_points}")
+    print(f"Total SH Points: {total_sh_points}")
+    print(f"Total CL Points: {total_cl_points}")
+    print(f"Total INT Points: {total_int_points}")
+    print(f"Total WF Points: {total_wf_points}")
+    print(f"Total Combined Points: {total_points}")
+
+     # Prepare data for CSV export (exclude "Game Stats Points" and "Fantasy Stats")
     data = {
         'Player ID': fantasy_stats['id'],
         'Name': f"{fantasy_stats['first_name']} {fantasy_stats['last_name']}",
@@ -215,7 +199,6 @@ def combine_stats(player_identification):
         'Total GL Points': total_gl_points,
         'Total ASS Points': total_ass_points,
         'Total YC Points': total_yc_points,
-        'Total RC Points': total_rc_points,
         'Total GC Points': total_gc_points,
         'Total CS Points': total_cs_points,
         'Total GS Points': total_gs_points,
@@ -237,27 +220,19 @@ def combine_stats(player_identification):
     }
 
     # Export to CSV
-    with open('player_stats.csv', 'a', newline='') as csvfile:
+    with open('player_stats.csv', 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=data.keys())
-        if csvfile.tell() == 0:  # If file is empty, write the header
-            writer.writeheader()
+        writer.writeheader()
         writer.writerow(data)
 
-    #print(f"Data exported for Player {player_identification} to 'player_stats.csv'")
+    print(f"Data exported to 'player_stats.csv'")
 
     return total_points
 
 
 def main():
-    player_ids = load_player_ids()
-
-    # Limit to the first 50 player IDs
-    player_ids = player_ids[:50]  # Slice the list to the first 50 players
-
-    for player_id in player_ids:
-        combine_stats(player_id)
-
-
+    player_id = input('Enter the player ID to search: ')
+    total_points = combine_stats(player_id)
 
 if __name__ == '__main__':
     main()
