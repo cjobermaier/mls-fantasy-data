@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLS Fantasy Player Search</title>
+</head>
+<body>
+    <h1>MLS Fantasy Player Search</h1>
+    <form method="POST" action="/">
+        <label for="search_term">Search by Player ID, First Name, Last Name, or Known Name:</label>
+        <input type="text" id="search_term" name="search_term" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if results %}
+    <h2>Search Results</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Known Name</th>
+                <th>Cost</th>
+                <th>Status</th>
+                <th>Stats</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in results %}
+            <tr>
+                <td>{{ player.id }}</td>
+                <td>{{ player.first_name }}</td>
+                <td>{{ player.last_name }}</td>
+                <td>{{ player.known_name }}</td>
+                <td>{{ player.cost }}</td>
+                <td>{{ player.status }}</td>
+                <td>
+                    <!-- Stats Section -->
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Games Played</th>
+                                <th>Total Points</th>
+                                <th>Avg Points</th>
+                                <th>High Score</th>
+                                <th>Low Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ player.stats.games_played }}</td>
+                                <td>{{ player.stats.total_points }}</td>
+                                <td>{{ player.stats.avg_points }}</td>
+                                <td>{{ player.stats.high_score }}</td>
+                                <td>{{ player.stats.low_score }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- Match Stats Section -->
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Round Rank</th>
+                                <th>Season Rank</th>
+                                <th>Selections</th>
+                                <th>Owned By (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ player.stats.round_rank }}</td>
+                                <td>{{ player.stats.season_rank }}</td>
+                                <td>{{ player.stats.selections }}</td>
+                                <td>{{ player.stats.owned_by }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>
