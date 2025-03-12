@@ -1,25 +1,50 @@
 import requests
 import json
+import csv
+
+# Read data from a CSV file
+def read_csv_data(filename):
+    data = []
+    with open(filename, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            data.append(row)
+    return data
+
+def find_player_id(search_value, data):
+    # Convert the search value to lowercase for case-insensitive comparison
+    search_value = search_value.lower()
+
+    # Iterate through each player record in the data
+    for player in data:
+        # Check if the search value (in lowercase) matches any of the four fields (also in lowercase)
+        if any(search_value in str(field).lower() for field in player):
+            return player[0]  # Return the id (the first element in the list)
+    return None  # If no match is found
+
+# Test the function
+# Get the search value from the user
+search_value = input("Enter the player's name or ID to search: ")
+
+# Load data from the CSV file (replace 'players.csv' with your actual CSV filename)
+data = read_csv_data('players_data.csv')
+
+# Find the player ID based on the user input
+player_id = find_player_id(search_value, data)  # Pass 'data' here as the second argument
+
+if player_id:
+    print(f"Player ID for '{search_value}': {player_id}")
+else:
+    print(f"Player '{search_value}' not found.")
 
 # URL for the JSON data from S3
-url = "https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/players.json?_=1741793495420"
+url = f"https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/stats/players/{player_id}.json?_=1741794986293"
 response = requests.get(url)
 
-# Check if the request was successful
+# Check if the request was successful 
 if response.status_code == 200:
     # Load the response data as JSON
     players_data = response.json()
-
-    # CSV Header
-    csv_data = [
-        "id", "sportec_id", "first_name", "last_name", "known_name", "squad_id", "cost", "status",
-        "round_rank", "season_rank", "games_played", "total_points", "avg_points", "high_score", 
-        "low_score", "last_3_avg", "last_5_avg", "selections", "owned_by", "projected_scores_20250409",
-        "position"
-    ]
-
-    # Prepare an empty list to store all players' data
-    all_players_data = []
 
     # Process each player in the JSON data
     for player in players_data:
@@ -48,21 +73,6 @@ if response.status_code == 200:
             player.get("positions", [])[0] if player.get("positions") else ""
         ]
 
-        # Append player values to the list
-        all_players_data.append(values)
-
-    # Create CSV format string
-    header = ",".join(csv_data)
-    rows = "\n".join([",".join(str(value) for value in player) for player in all_players_data])
-
-    # Combine header and rows
-    csv_output = f"{header}\n{rows}"
-
-    # Write the CSV data to a file
-    with open('players_data.csv', 'w') as file:
-        file.write(csv_output)
-
-    print("CSV file saved as 'players_data.csv'.")
-
+    print(players_data)
 else:
     print(f"Failed to retrieve data. Status code: {response.status_code}")
