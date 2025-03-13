@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Player Stats</title>
+        <!-- Include DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.css">
+    
+        <!-- Include jQuery -->
+        <script type="text/javascript" charset="utf-8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    
+        <!-- Include DataTables JS -->
+        <script type="text/javascript" charset="utf-8" src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.js"></script>
+    
+        <!-- Include DataTables SearchBuilder JS for advanced filters -->
+        <script type="text/javascript" charset="utf-8" src="https://cdn.datatables.net/searchbuilder/1.0.1/js/dataTables.searchBuilder.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/searchbuilder/1.0.1/css/searchBuilder.dataTables.min.css">
+    </head>
+    <body>
+        <h1>Player Fantasy Stats</h1>
+
+        <!-- Filter Options -->
+        <div>
+            <label for="goal-filter">Goals:</label>
+            <input type="number" id="goal-filter" placeholder="Filter by goals">
+            
+            <label for="assist-filter">Assists:</label>
+            <input type="number" id="assist-filter" placeholder="Filter by assists">
+            
+            <label for="points-filter">Total Points:</label>
+            <input type="number" id="points-filter" placeholder="Filter by total points">
+        </div>
+
+        <table id="player-stats" class="display">
+            <thead>
+                <tr>
+                    <th>Player ID</th>
+                    <th>Name</th>
+                    <th>Cost</th>
+                    <th>Total Points</th>
+                    <th>Average Points</th>
+                    <th>Positions</th>
+                    <th>Total Combined Points</th>
+                    <th>Total MIN Points</th>
+                    <th>Total GL Points</th>
+                    <th>Total ASS Points</th>
+                    <th>Total YC Points</th>
+                    <th>Total RC Points</th>
+                    <th>Total GC Points</th>
+                    <th>Total CS Points</th>
+                    <th>Total GS Points</th>
+                    <th>Total PS Points</th>
+                    <th>Total PM Points</th>
+                    <th>Total OG Points</th>
+                    <th>Total SGS Points</th>
+                    <th>Total FS Points</th>
+                    <th>Total PSS Points</th>
+                    <th>Total APS Points</th>
+                    <th>Total CRS Points</th>
+                    <th>Total KP Points</th>
+                    <th>Total ASG Points</th>
+                    <th>Total SH Points</th>
+                    <th>Total CL Points</th>
+                    <th>Total INT Points</th>
+                    <th>Total WF Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row['Player ID'] }}</td>
+                    <td>{{ row['Name'] }}</td>
+                    <td>{{ row['Cost'] }}</td>
+                    <td>{{ row['Total Points'] }}</td>
+                    <td>{{ row['Average Points'] }}</td>
+                    <td>{{ row['Positions'] }}</td>
+                    <td>{{ row['Total Combined Points'] }}</td>
+                    <td>{{ row['Total MIN Points'] }}</td>
+                    <td>{{ row['Total GL Points'] }}</td>
+                    <td>{{ row['Total ASS Points'] }}</td>
+                    <td>{{ row['Total YC Points'] }}</td>
+                    <td>{{ row['Total RC Points'] }}</td>
+                    <td>{{ row['Total GC Points'] }}</td>
+                    <td>{{ row['Total CS Points'] }}</td>
+                    <td>{{ row['Total GS Points'] }}</td>
+                    <td>{{ row['Total PS Points'] }}</td>
+                    <td>{{ row['Total PM Points'] }}</td>
+                    <td>{{ row['Total OG Points'] }}</td>
+                    <td>{{ row['Total SGS Points'] }}</td>
+                    <td>{{ row['Total FS Points'] }}</td>
+                    <td>{{ row['Total PSS Points'] }}</td>
+                    <td>{{ row['Total APS Points'] }}</td>
+                    <td>{{ row['Total CRS Points'] }}</td>
+                    <td>{{ row['Total KP Points'] }}</td>
+                    <td>{{ row['Total ASG Points'] }}</td>
+                    <td>{{ row['Total SH Points'] }}</td>
+                    <td>{{ row['Total CL Points'] }}</td>
+                    <td>{{ row['Total INT Points'] }}</td>
+                    <td>{{ row['Total WF Points'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- JavaScript to initialize DataTables with filtering -->
+        <script>
+            $(document).ready(function() {
+                var table = $('#player-stats').DataTable({
+                    "paging": true,      // Enable pagination
+                    "ordering": true,    // Enable sorting
+                    "info": false,       // Disable table information (optional)
+                    searchBuilder: true  // Enable advanced search builder
+                });
+
+                // Filter by goals
+                $('#goal-filter').on('input', function() {
+                    table.columns(8).search(this.value).draw();
+                });
+
+                // Filter by assists
+                $('#assist-filter').on('input', function() {
+                    table.columns(9).search(this.value).draw();
+                });
+
+                // Filter by total points
+                $('#points-filter').on('input', function() {
+                    table.columns(3).search(this.value).draw();
+                });
+            });
+        </script>
+    </body>
+</html>
