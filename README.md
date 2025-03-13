@@ -1,6 +1,24 @@
-# mls-fantasy-data
+# MLS fantasy data
+Welcome,
+
+This repo builds and deploys https://mls-fantasy-data.fly.dev/ 
+
+## Run locally
+1. Build CSV file:
+   ```
+   python3 combine.py
+   ```
+3. Move CSV file into app folder:
+   ```
+   mv player_stats.csv app
+   ```
+5. Deploy app:
+   ```
+   python3 app/app.py
+   ```
 
 
+## Other scripts
 `list-of-player-id.py`
 Generates a list:
 ```
