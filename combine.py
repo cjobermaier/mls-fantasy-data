@@ -233,7 +233,7 @@ def main():
     player_ids = [player['id'] for player in all_player_data]
     
     # Limit to the first 50 player IDs for testing
-    player_ids = player_ids[:5]  # Adjust as needed
+    player_ids = player_ids[:5000]  # Adjust as needed
     
     # Fetch game stats for all players at once
     all_game_stats = fetch_all_game_stats(player_ids)
