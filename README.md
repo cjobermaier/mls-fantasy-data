@@ -3,7 +3,7 @@ Welcome,
 
 This repo builds and deploys https://mls-fantasy-data.fly.dev/ 
 
-## Run locally
+## Run locally with Python
 1. Build CSV file:
    ```
    python3 combine.py
@@ -16,6 +16,24 @@ This repo builds and deploys https://mls-fantasy-data.fly.dev/
    ```
    python3 app/app.py
    ```
+## Run locally with Docker
+1. Build CSV file:
+   ```
+   python3 combine.py
+   ```
+2. Move CSV file into app folder:
+   ```
+   mv player_stats.csv app
+   ```
+3. Build Docker container
+   ```
+   cd app
+   docker build -t mls-fantasy-data .
+   ```
+4. Run Docker container
+   ```
+   docker run -p 8080:80 mls-fantasy-data
+   ``` 
 
 
 ## Other scripts
