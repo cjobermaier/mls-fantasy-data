@@ -591,16 +591,19 @@
             $('#apply-filters').on('click', function() {
                 applyFilters();
             });
-            
+
             // Reset filters button logic
             $('#reset-filters').on('click', function() {
                 $('#position-filter').val('');
                 $('#goal-filter').val('');
                 $('#assist-filter').val('');
                 $('#points-filter').val('');
+                
+                // Clear all filters
+                $.fn.dataTable.ext.search = [];
                 table.search('').columns().search('').draw();
             });
-            
+
             // Function to apply all filters at once
             function applyFilters() {
                 let positionVal = $('#position-filter').val();
@@ -609,40 +612,47 @@
                 let pointsVal = $('#points-filter').val();
                 
                 // Clear previous filters
-                table.search('').columns().search('').draw();
+                table.search('').columns().search('');
+                $.fn.dataTable.ext.search = [];
                 
-                // Apply position filter (column 5 - Positions)
+                // Apply position filter (column 6 - Positions)
                 if (positionVal) {
-                    table.column(5).search(positionVal).draw();
+                    table.column(6).search(positionVal);
                 }
                 
-                // For numeric filters, we would need custom filtering
-                // This is a simplified example - in a real app you'd use jQuery DataTables API
-                // to implement proper "greater than" filtering
-                if (goalVal) {
-                    filterNumeric(table, 8, goalVal);
+                // Setup numeric filters
+                if (goalVal || assistVal || pointsVal) {
+                    $.fn.dataTable.ext.search.push(
+                        function(settings, data, dataIndex) {
+                            let pass = true;
+                            
+                            // Goals filter (column 9)
+                            if (goalVal && pass) {
+                                let value = parseFloat(data[9]) || 0;
+                                pass = value >= parseFloat(goalVal);
+                            }
+                            
+                            // Assists filter (column 10)
+                            if (assistVal && pass) {
+                                let value = parseFloat(data[10]) || 0;
+                                pass = value >= parseFloat(assistVal);
+                            }
+                            
+                            // Total Points filter (column 4)
+                            if (pointsVal && pass) {
+                                let value = parseFloat(data[4]) || 0;
+                                pass = value >= parseFloat(pointsVal);
+                            }
+                            
+                            return pass;
+                        }
+                    );
                 }
                 
-                if (assistVal) {
-                    filterNumeric(table, 9, assistVal);
-                }
-                
-                if (pointsVal) {
-                    filterNumeric(table, 3, pointsVal);
-                }
-            }
-            
-            // Function to filter numeric values (greater than or equal)
-            function filterNumeric(table, columnIndex, minValue) {
-                $.fn.dataTable.ext.search.push(
-                    function(settings, data, dataIndex) {
-                        let value = parseFloat(data[columnIndex]) || 0;
-                        return value >= parseFloat(minValue);
-                    }
-                );
+                // Apply all filters
                 table.draw();
-                $.fn.dataTable.ext.search.pop(); // Remove the filter after applying
             }
+                $.fn.dataTable.ext.search.pop(); // Remove the filter after applying
             
             // Dark mode toggle
             $('#toggleDarkMode').on('click', function() {

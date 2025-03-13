@@ -40,8 +40,10 @@ def fetch_all_game_stats(player_ids):
 
 def extract_fantasy_stats(player_data, player_id):
     """Extract fantasy stats for a specific player from the already downloaded data."""
+    position_mapping = {1: 'Goalkeeper', 2: 'Defender', 3: 'Midfielder', 4: 'Forward'}
     for player in player_data:
         if player.get('id') == player_id:
+            positions = [position_mapping.get(pos, 'Unknown') for pos in player.get('positions', [])]
             return {
                 'id': player['id'],
                 'first_name': player.get('first_name', ''),
@@ -52,7 +54,7 @@ def extract_fantasy_stats(player_data, player_id):
                 'owned_by': player.get('stats', {}).get('owned_by', 0),
                 'high_score': player.get('stats', {}).get('high_score', 0),
                 'low_score': player.get('stats', {}).get('low_score', 0),
-                'positions': player.get('positions', [])
+                'positions': positions
             }
     return {}
 
@@ -213,14 +215,14 @@ def export_to_csv(player_data_list):
     """Export all player data to a CSV file."""
     if not player_data_list:
         return
-    
+
     field_names = player_data_list[0].keys()
-    
+
     with open('player_stats.csv', 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=field_names)
         writer.writeheader()
         writer.writerows(player_data_list)
-    
+
     print(f"Data exported for {len(player_data_list)} players to 'player_stats.csv'")
 
 def main():
@@ -231,7 +233,7 @@ def main():
     player_ids = [player['id'] for player in all_player_data]
     
     # Limit to the first 50 player IDs for testing
-    player_ids = player_ids[:500]  # Adjust as needed
+    player_ids = player_ids[:5]  # Adjust as needed
     
     # Fetch game stats for all players at once
     all_game_stats = fetch_all_game_stats(player_ids)
