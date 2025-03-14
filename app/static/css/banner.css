@@ -1,0 +1,57 @@
+/* Banner styles with primary color to match buttons */
+.header {
+    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+    color: white;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.header h1 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header i.fa-futbol {
+    font-size: 1.5rem;
+    margin-right: 12px;
+    color: white;
+}
+
+#toggleDarkMode {
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#toggleDarkMode:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header i.fa-futbol {
+        font-size: 1.3rem;
+    }
+}
+
+/* Dark mode adjustments */
+body.dark-mode .header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1e6091 100%);
+}
