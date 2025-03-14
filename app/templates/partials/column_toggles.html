@@ -7,62 +7,186 @@
     
     <div class="row">
         <div class="col-md-12">
-            <div class="d-flex flex-wrap mt-2">
-                <div class="column-group">
-                    <span class="badge bg-primary mb-2">Basic Info</span><br>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="0">Player ID</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="1">Name</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="2">Team</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="3">Cost</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="4">Owned By</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="7">Positions</button>
+            <!-- Column group navigation tabs -->
+            <ul class="nav nav-tabs column-nav mb-3" id="columnToggleTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-columns" type="button" role="tab" aria-controls="basic-columns" aria-selected="true">
+                        <i class="fas fa-id-card me-1"></i> Basic
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="points-tab" data-bs-toggle="tab" data-bs-target="#points-columns" type="button" role="tab" aria-controls="points-columns" aria-selected="false">
+                        <i class="fas fa-chart-line me-1"></i> Points
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="offensive-tab" data-bs-toggle="tab" data-bs-target="#offensive-columns" type="button" role="tab" aria-controls="offensive-columns" aria-selected="false">
+                        <i class="fas fa-futbol me-1"></i> Offensive
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="defensive-tab" data-bs-toggle="tab" data-bs-target="#defensive-columns" type="button" role="tab" aria-controls="defensive-columns" aria-selected="false">
+                        <i class="fas fa-shield-alt me-1"></i> Defensive
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other-columns" type="button" role="tab" aria-controls="other-columns" aria-selected="false">
+                        <i class="fas fa-ellipsis-h me-1"></i> Other
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Column group tab content -->
+            <div class="tab-content" id="columnToggleContent">
+                <!-- Basic Info Columns -->
+                <div class="tab-pane fade show active" id="basic-columns" role="tabpanel" aria-labelledby="basic-tab">
+                    <div class="column-group-header">
+                        <span class="badge bg-primary mb-2">Basic Info</span>
+                        <small class="text-muted ms-2">Player identification and team details</small>
+                    </div>
+                    <div class="column-buttons">
+                        <button class="btn column-toggle-btn active" data-column="0" data-bs-toggle="tooltip" title="Show/hide Player ID column">
+                            <i class="fas fa-hashtag me-1"></i> Player ID
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="1" data-bs-toggle="tooltip" title="Show/hide Name column">
+                            <i class="fas fa-user me-1"></i> Name
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="2" data-bs-toggle="tooltip" title="Show/hide Team column">
+                            <i class="fas fa-users me-1"></i> Team
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="3" data-bs-toggle="tooltip" title="Show/hide Cost column">
+                            <i class="fas fa-dollar-sign me-1"></i> Cost
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="4" data-bs-toggle="tooltip" title="Show/hide Owned By column">
+                            <i class="fas fa-percentage me-1"></i> Owned By
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="7" data-bs-toggle="tooltip" title="Show/hide Positions column">
+                            <i class="fas fa-running me-1"></i> Positions
+                        </button>
+                    </div>
                 </div>
-                <div class="column-group">
-                    <span class="badge bg-success mb-2">Point Stats</span><br>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="5">Total Points</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="6">Average Points</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="8">Combined Pts</button>
+                
+                <!-- Points Stats Columns -->
+                <div class="tab-pane fade" id="points-columns" role="tabpanel" aria-labelledby="points-tab">
+                    <div class="column-group-header">
+                        <span class="badge bg-success mb-2">Point Stats</span>
+                        <small class="text-muted ms-2">Fantasy points performance metrics</small>
+                    </div>
+                    <div class="column-buttons">
+                        <button class="btn column-toggle-btn active" data-column="5" data-bs-toggle="tooltip" title="Show/hide Total Points column">
+                            <i class="fas fa-star me-1"></i> Total Points
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="6" data-bs-toggle="tooltip" title="Show/hide Average Points column">
+                            <i class="fas fa-calculator me-1"></i> Average Points
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="8" data-bs-toggle="tooltip" title="Show/hide Combined Points column">
+                            <i class="fas fa-chart-pie me-1"></i> Combined Pts
+                        </button>
+                    </div>
                 </div>
-                <div class="column-group">
-                    <span class="badge bg-danger mb-2">Offensive</span><br>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="10">Goals</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="11">Assists</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="12">Yellow Cards</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="13">Red Cards</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="14">Goals Conceded</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="15">Clean Sheets</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="16">Shots on Goal</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="17">Penalty Scored</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="18">Penalty Missed</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="19">Own Goals</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="20">Saved Goals</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="21">Fouls</button>
+                
+                <!-- Offensive Stats Columns -->
+                <div class="tab-pane fade" id="offensive-columns" role="tabpanel" aria-labelledby="offensive-tab">
+                    <div class="column-group-header">
+                        <span class="badge bg-danger mb-2">Offensive</span>
+                        <small class="text-muted ms-2">Goal scoring and attacking metrics</small>
+                    </div>
+                    <div class="column-buttons">
+                        <button class="btn column-toggle-btn" data-column="10" data-bs-toggle="tooltip" title="Show/hide Goals column">
+                            <i class="fas fa-bullseye me-1"></i> Goals
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="11" data-bs-toggle="tooltip" title="Show/hide Assists column">
+                            <i class="fas fa-hands-helping me-1"></i> Assists
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="12" data-bs-toggle="tooltip" title="Show/hide Yellow Cards column">
+                            <i class="fas fa-square text-warning me-1"></i> Yellow Cards
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="13" data-bs-toggle="tooltip" title="Show/hide Red Cards column">
+                            <i class="fas fa-square text-danger me-1"></i> Red Cards
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="14" data-bs-toggle="tooltip" title="Show/hide Goals Conceded column">
+                            <i class="fas fa-futbol me-1"></i> Goals Conceded
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="15" data-bs-toggle="tooltip" title="Show/hide Clean Sheets column">
+                            <i class="fas fa-shield-alt me-1"></i> Clean Sheets
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="16" data-bs-toggle="tooltip" title="Show/hide Shots on Goal column">
+                            <i class="fas fa-crosshairs me-1"></i> Shots on Goal
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="17" data-bs-toggle="tooltip" title="Show/hide Penalty Scored column">
+                            <i class="fas fa-check-circle me-1"></i> Penalty Scored
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="18" data-bs-toggle="tooltip" title="Show/hide Penalty Missed column">
+                            <i class="fas fa-times-circle me-1"></i> Penalty Missed
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="19" data-bs-toggle="tooltip" title="Show/hide Own Goals column">
+                            <i class="fas fa-arrow-alt-circle-down me-1"></i> Own Goals
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="20" data-bs-toggle="tooltip" title="Show/hide Saved Goals column">
+                            <i class="fas fa-hand-paper me-1"></i> Saved Goals
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="21" data-bs-toggle="tooltip" title="Show/hide Fouls column">
+                            <i class="fas fa-whistle me-1"></i> Fouls
+                        </button>
+                    </div>
                 </div>
-                <div class="column-group">
-                    <span class="badge bg-info mb-2">Defensive</span><br>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="22">Pass Success</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="23">Aerial Passes</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="24">Key Passes</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="25">Crosses</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="26">Assist Goals</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="27">Shots</button>
+                
+                <!-- Defensive Stats Columns -->
+                <div class="tab-pane fade" id="defensive-columns" role="tabpanel" aria-labelledby="defensive-tab">
+                    <div class="column-group-header">
+                        <span class="badge bg-info mb-2">Defensive</span>
+                        <small class="text-muted ms-2">Passing and defensive performance metrics</small>
+                    </div>
+                    <div class="column-buttons">
+                        <button class="btn column-toggle-btn" data-column="22" data-bs-toggle="tooltip" title="Show/hide Pass Success column">
+                            <i class="fas fa-exchange-alt me-1"></i> Pass Success
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="23" data-bs-toggle="tooltip" title="Show/hide Aerial Passes column">
+                            <i class="fas fa-level-up-alt me-1"></i> Aerial Passes
+                        </button>
+                        <button class="btn column-toggle-btn active" data-column="24" data-bs-toggle="tooltip" title="Show/hide Key Passes column">
+                            <i class="fas fa-key me-1"></i> Key Passes
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="25" data-bs-toggle="tooltip" title="Show/hide Crosses column">
+                            <i class="fas fa-directions me-1"></i> Crosses
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="26" data-bs-toggle="tooltip" title="Show/hide Assist Goals column">
+                            <i class="fas fa-handshake me-1"></i> Assist Goals
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="27" data-bs-toggle="tooltip" title="Show/hide Shots column">
+                            <i class="fas fa-bolt me-1"></i> Shots
+                        </button>
+                    </div>
                 </div>
-                <div class="column-group">
-                    <span class="badge bg-warning text-dark mb-2">Other Stats</span><br>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="28">Clearances</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="29">Interceptions</button>
-                    <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="30">Won Fouls</button>
+                
+                <!-- Other Stats Columns -->
+                <div class="tab-pane fade" id="other-columns" role="tabpanel" aria-labelledby="other-tab">
+                    <div class="column-group-header">
+                        <span class="badge bg-warning text-dark mb-2">Other Stats</span>
+                        <small class="text-muted ms-2">Additional performance metrics</small>
+                    </div>
+                    <div class="column-buttons">
+                        <button class="btn column-toggle-btn" data-column="28" data-bs-toggle="tooltip" title="Show/hide Clearances column">
+                            <i class="fas fa-broom me-1"></i> Clearances
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="29" data-bs-toggle="tooltip" title="Show/hide Interceptions column">
+                            <i class="fas fa-cut me-1"></i> Interceptions
+                        </button>
+                        <button class="btn column-toggle-btn" data-column="30" data-bs-toggle="tooltip" title="Show/hide Won Fouls column">
+                            <i class="fas fa-exclamation-triangle me-1"></i> Won Fouls
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-3">
-                <button id="show-all-columns" class="btn btn-sm btn-outline-primary me-2">
+            <div class="column-actions mt-3">
+                <button id="show-all-columns" class="btn btn-outline-primary me-2">
                     <i class="fas fa-eye me-1"></i> Show All
                 </button>
-                <button id="hide-all-columns" class="btn btn-sm btn-outline-secondary me-2">
+                <button id="hide-all-columns" class="btn btn-outline-secondary me-2">
                     <i class="fas fa-eye-slash me-1"></i> Hide All
                 </button>
-                <button id="restore-default-columns" class="btn btn-sm btn-outline-primary">
+                <button id="restore-default-columns" class="btn btn-outline-primary">
                     <i class="fas fa-undo me-1"></i> Default View
                 </button>
             </div>

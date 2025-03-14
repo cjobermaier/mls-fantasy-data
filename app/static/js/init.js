@@ -135,10 +135,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Function to setup column toggles
+    // Enhanced function to setup column toggles
     function setupColumnToggles(table) {
         // Initialize button states
         syncButtonStates(table);
+        
+        // Initialize tooltips for buttons
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                trigger: 'hover',
+                boundary: document.body
+            });
+        });
         
         // Column toggle buttons
         $('.column-toggle-btn').on('click', function() {
@@ -150,6 +159,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update this button's state
             $(this).toggleClass('active', column.visible());
+            
+            // Add subtle animation to show state change
+            $(this).addClass('btn-pulse');
+            setTimeout(() => {
+                $(this).removeClass('btn-pulse');
+            }, 300);
         });
         
         // Show all columns
@@ -157,6 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
             table.columns().visible(true);
             $('.column-toggle-btn').addClass('active');
             syncButtonStates(table);
+            
+            // Add feedback for user
+            showToast('All columns are now visible', 'success');
         });
         
         // Hide all columns
@@ -167,6 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
             syncButtonStates(table);
             $('.column-toggle-btn').removeClass('active');
             $('.column-toggle-btn[data-column="1"]').addClass('active');
+            
+            // Add feedback for user
+            showToast('All columns except Name are now hidden', 'info');
         });
         
         // Restore default view
@@ -182,6 +203,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update all toggle buttons to match table state
             syncButtonStates(table);
+            
+            // Add feedback for user
+            showToast('Default column view restored', 'success');
+        });
+        
+        // Count visible columns for each category
+        updateCategoryCounters();
+        
+        // Add counter update on column visibility change
+        table.on('column-visibility.dt', function() {
+            updateCategoryCounters();
         });
     }
     
@@ -191,6 +223,76 @@ document.addEventListener('DOMContentLoaded', function() {
             const columnIndex = parseInt($(this).data('column'));
             const isVisible = table.column(columnIndex).visible();
             $(this).toggleClass('active', isVisible);
+        });
+    }
+    
+    // Helper function to update category counters
+    function updateCategoryCounters() {
+        // Define category ranges
+        const categories = {
+            'basic': [0, 1, 2, 3, 4, 7],
+            'points': [5, 6, 8],
+            'offensive': [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+            'defensive': [22, 23, 24, 25, 26, 27],
+            'other': [28, 29, 30]
+        };
+        
+        // For each category, count visible columns
+        for (let category in categories) {
+            let visibleCount = 0;
+            let totalCount = categories[category].length;
+            
+            categories[category].forEach(colIndex => {
+                const $button = $(`.column-toggle-btn[data-column="${colIndex}"]`);
+                if ($button.hasClass('active')) {
+                    visibleCount++;
+                }
+            });
+            
+            // Update the tab badge if it exists
+            const $badge = $(`#${category}-tab .badge`);
+            if ($badge.length) {
+                $badge.text(`${visibleCount}/${totalCount}`);
+            }
+        }
+    }
+    
+    // Helper function for showing toast notifications
+    function showToast(message, type = 'info') {
+        // Check if toast container exists, if not create it
+        if ($('#toast-container').length === 0) {
+            $('body').append('<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11"></div>');
+        }
+        
+        // Create a unique ID for this toast
+        const toastId = 'toast-' + Date.now();
+        
+        // Create the toast HTML
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        
+        // Add it to the container
+        $('#toast-container').append(toastHtml);
+        
+        // Initialize and show the toast
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 3000
+        });
+        toast.show();
+        
+        // Remove toast from DOM after it's hidden
+        $(toastElement).on('hidden.bs.toast', function() {
+            $(this).remove();
         });
     }
     
@@ -428,4 +530,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Dark mode initialized');
     }
+    
+    // Add CSS animation for button pulse
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        .btn-pulse {
+            animation: button-pulse 0.3s ease;
+        }
+        
+        @keyframes button-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(styleSheet);
 });
