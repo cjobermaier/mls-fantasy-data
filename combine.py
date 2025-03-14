@@ -2,6 +2,26 @@ import requests
 import math
 import csv
 
+def fetch_all_team_data():
+    """Fetch all team data from the S3 bucket once and store it."""
+    url = "https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/squads.json?_=1741969652364"
+    
+    response = requests.get(url)
+    if response.status_code == 200:
+        teams = response.json()
+        
+        # Create a dictionary mapping team IDs to their data
+        team_dict = {team['id']: team for team in teams}
+        
+        # Print the fetched team data for testing
+       # for team_id, team_info in team_dict.items():
+           # print(f"Team ID: {team_id}, Name: {team_info['name']}, Short Name: {team_info['short_name']}")
+        
+        return team_dict
+    else:
+        print(f"Failed to fetch team data, status code: {response.status_code}")
+        return {}
+
 def fetch_all_player_data():
     """Fetch all player data from the S3 bucket once and store it."""
     url = "https://fgp-data-us.s3.us-east-1.amazonaws.com/json/mls_mls/players.json?_=1741793495420"
@@ -54,11 +74,12 @@ def extract_fantasy_stats(player_data, player_id):
                 'owned_by': player.get('stats', {}).get('owned_by', 0),
                 'high_score': player.get('stats', {}).get('high_score', 0),
                 'low_score': player.get('stats', {}).get('low_score', 0),
-                'positions': positions
+                'positions': positions,
+                'squad_id': player.get('squad_id', 0)  # Add squad_id here
             }
     return {}
 
-def calculate_player_points(game_stats, fantasy_stats):
+def calculate_player_points(game_stats, fantasy_stats, team_dict):
     """Calculate fantasy points for a player based on game statistics."""
     total_min_points = 0
     total_gl_points = 0
@@ -175,10 +196,15 @@ def calculate_player_points(game_stats, fantasy_stats):
         total_asg_points + total_sh_points + total_cl_points + total_int_points + total_wf_points
     )
 
+    # At the end, add the Team Name to your return dictionary:
+    squad_id = fantasy_stats.get('squad_id', 0)
+    team_name = team_dict.get(squad_id, {}).get('name', 'Unknown Team')
+
     # Prepare data for CSV export
     return {
         'Player ID': fantasy_stats['id'],
         'Name': f"{fantasy_stats['first_name']} {fantasy_stats['last_name']}",
+        'Team': team_name,  # Add team name here
         'Cost': fantasy_stats['cost'],
         'Total Points': fantasy_stats['total_points'],
         'Average Points': fantasy_stats['avg_points'],
@@ -226,6 +252,9 @@ def export_to_csv(player_data_list):
     print(f"Data exported for {len(player_data_list)} players to 'player_stats.csv'")
 
 def main():
+    # Fetch all team data once
+    all_team_data = fetch_all_team_data()
+    
     # Fetch all player data once
     all_player_data = fetch_all_player_data()
     
@@ -233,7 +262,7 @@ def main():
     player_ids = [player['id'] for player in all_player_data]
     
     # Limit to the first 50 player IDs for testing
-    player_ids = player_ids[:5000]  # Adjust as needed
+    player_ids = player_ids[:5]  # Adjust as needed
     
     # Fetch game stats for all players at once
     all_game_stats = fetch_all_game_stats(player_ids)
@@ -245,7 +274,7 @@ def main():
         game_stats = all_game_stats.get(player_id, [])
         
         if fantasy_stats and game_stats:
-            player_result = calculate_player_points(game_stats, fantasy_stats)
+            player_result = calculate_player_points(game_stats, fantasy_stats, all_team_data)
             player_results.append(player_result)
     
     # Export all player data at once

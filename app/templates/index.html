@@ -288,57 +288,42 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="d-flex flex-wrap mt-2">
-                        <div class="column-group">
-                            <span class="badge bg-primary mb-2">Basic Info</span><br>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="0">Player ID</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="1">Name</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="2">Cost</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="3">Owned By</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="6">Positions</button>
-                        </div>
-                        
-                        <div class="column-group">
-                            <span class="badge bg-success mb-2">Point Stats</span><br>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="4">Total Points</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="5">Avg Points</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="7">Combined Pts</button>
-                        </div>
-                        
-                        <div class="column-group">
-                            <span class="badge bg-danger mb-2">Offensive</span><br>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="9">Goals</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="10">Assists</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="15">Shots on Goal</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="23">Key Passes</button>
-                        </div>
-                        
-                        <div class="column-group">
-                            <span class="badge bg-info mb-2">Defensive</span><br>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="14">Clean Sheets</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="28">Interceptions</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="11">Yellow Cards</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="12">Red Cards</button>
-                        </div>
-                        
-                        <div class="column-group">
-                            <span class="badge bg-warning text-dark mb-2">Other Stats</span><br>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="13">Goals Conceded</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="16">Penalty Scored</button>
-                            <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="17">Penalty Missed</button>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-3">
-                        <button id="show-all-columns" class="btn btn-sm btn-outline-primary me-2">
-                            <i class="fas fa-eye me-1"></i> Show All
-                        </button>
-                        <button id="hide-all-columns" class="btn btn-sm btn-outline-secondary me-2">
-                            <i class="fas fa-eye-slash me-1"></i> Hide All
-                        </button>
-                        <button id="restore-default-columns" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-undo me-1"></i> Default View
-                        </button>
-                    </div>
+                       <div class="column-group">
+                         <span class="badge bg-primary mb-2">Basic Info</span><br>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="0">Player ID</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="1">Name</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="2">Team</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="3">Cost</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="4">Owned By</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="7">Positions</button>
+                       </div>
+                       <div class="column-group">
+                         <span class="badge bg-success mb-2">Point Stats</span><br>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="5">Total Points</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="6">Avg Points</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="8">Combined Pts</button>
+                       </div>
+                       <div class="column-group">
+                         <span class="badge bg-danger mb-2">Offensive</span><br>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="10">Goals</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn active" data-column="11">Assists</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="16">Shots on Goal</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="24">Key Passes</button>
+                       </div>
+                       <div class="column-group">
+                         <span class="badge bg-info mb-2">Defensive</span><br>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="15">Clean Sheets</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="29">Interceptions</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="12">Yellow Cards</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="13">Red Cards</button>
+                       </div>
+                       <div class="column-group">
+                         <span class="badge bg-warning text-dark mb-2">Other Stats</span><br>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="14">Goals Conceded</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="17">Penalty Scored</button>
+                         <button class="btn btn-sm btn-outline-secondary column-toggle-btn" data-column="18">Penalty Missed</button>
+                       </div>
+                     </div>
                 </div>
             </div>
         </div>
@@ -366,6 +351,7 @@
                     <tr>
                         <th>Player ID</th>
                         <th>Name</th>
+                        <th>Team</th>
                         <th>Cost</th>
                         <th>Owned By</th>
                         <th>Total Points</th>
@@ -401,6 +387,7 @@
                     <tr>
                         <td>{{ row['Player ID'] }}</td>
                         <td>{{ row['Name'] }}</td>
+                        <td>{{ row['Team'] }}</td>
                         <td>{{ row['Cost'] }}</td>
                         <td>{{ row['Owned By'] }}</td>
                         <td class="stat-highlight">{{ row['Total Points'] }}</td>
@@ -524,14 +511,15 @@
                 },
                 // Default column visibility - hide some columns initially for better readability
                 columnDefs: [
-                    { targets: [7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28], visible: false }
+                    // Update these indexes to reflect new column structure (with Team added)
+                    { targets: [8, 12, 13, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29], visible: false }
                 ],
                 // Initialize with search builder but not shown
                 searchBuilder: {
                     container: $('#search-builder-container')
                 }
             });
-            
+            syncButtonStates();
             // Add advanced filter toggle
             $('#toggle-search-builder').on('click', function() {
                 $('#search-builder-container').toggle();
@@ -551,15 +539,21 @@
             
             // Column toggle buttons
             $('.column-toggle-btn').on('click', function() {
-                const column = table.column($(this).data('column'));
+                const columnIndex = parseInt($(this).data('column'));
+                const column = table.column(columnIndex);
+                
+                // Toggle column visibility
                 column.visible(!column.visible());
-                $(this).toggleClass('active');
+                
+                // Update this button's state
+                $(this).toggleClass('active', column.visible());
             });
             
             // Show all columns
             $('#show-all-columns').on('click', function() {
                 table.columns().visible(true);
                 $('.column-toggle-btn').addClass('active');
+                syncButtonStates();
             });
             
             // Hide all columns
@@ -567,25 +561,37 @@
                 // Keep at least the name column visible
                 table.columns().visible(false);
                 table.column(1).visible(true);
+                syncButtonStates();
                 $('.column-toggle-btn').removeClass('active');
                 $('.column-toggle-btn[data-column="1"]').addClass('active');
             });
             
             // Restore default view
             $('#restore-default-columns').on('click', function() {
-                // Make essential columns visible, hide others
+                // First, hide all columns
                 table.columns().visible(false);
-                table.columns([0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13]).visible(true);
                 
-                // Update button states
-                $('.column-toggle-btn').removeClass('active');
+                // Define which columns should be visible by default
+                const visibleColumns = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 14];
+                syncButtonStates();
+                // Make those columns visible
+                table.columns(visibleColumns).visible(true);
+                
+                // Update all toggle buttons to match table state
                 $('.column-toggle-btn').each(function() {
-                    var columnIndex = $(this).data('column');
-                    if ([0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13].includes(columnIndex)) {
-                        $(this).addClass('active');
-                    }
+                    const columnIndex = parseInt($(this).data('column'));
+                    $(this).toggleClass('active', visibleColumns.includes(columnIndex));
                 });
             });
+
+            // Add this function to synchronize button states with actual column visibility
+            function syncButtonStates() {
+                $('.column-toggle-btn').each(function() {
+                    const columnIndex = parseInt($(this).data('column'));
+                    const isVisible = table.column(columnIndex).visible();
+                    $(this).toggleClass('active', isVisible);
+                });
+            }
             
             // Apply filters button logic
             $('#apply-filters').on('click', function() {
