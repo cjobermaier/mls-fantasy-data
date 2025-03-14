@@ -1,0 +1,107 @@
+<!-- Filter Options Card -->
+<div class="filters-card">
+    <div class="filters-title">
+        <i class="fas fa-filter fa-lg"></i>
+        <h4 class="mb-0">Filter Players</h4>
+    </div>
+    
+    <div class="row filters-row">
+        <div class="col-md-3 filter-control">
+            <label class="filter-label" for="position-filter">Position:</label>
+            <select class="form-select" id="position-filter">
+                <option value="">All Positions</option>
+                <option value="GK">Goalkeeper (GK)</option>
+                <option value="DEF">Defense (DEF)</option>
+                <option value="MID">Midfield (MID)</option>
+                <option value="FWD">Forward (FWD)</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3 filter-control">
+            <label class="filter-label" for="goal-filter">Goals (Min):</label>
+            <input type="number" class="form-control" id="goal-filter" placeholder="Min goals">
+        </div>
+        
+        <div class="col-md-3 filter-control">
+            <label class="filter-label" for="assist-filter">Assists (Min):</label>
+            <input type="number" class="form-control" id="assist-filter" placeholder="Min assists">
+        </div>
+        
+        <div class="col-md-3 filter-control">
+            <label class="filter-label" for="points-filter">Total Points (Min):</label>
+            <input type="number" class="form-control" id="points-filter" placeholder="Min points">
+        </div>
+    </div>
+
+    <!-- Price Filter -->
+    <div class="row">
+        <div class="col-md-3 filter-control">
+            <label class="filter-label" for="price-filter">Price (Min):</label>
+            <select class="form-select" id="price-filter">
+                <option value="">Select Price Range</option>
+                <option value="4000000">4M</option>
+                <option value="4500000">4.5M</option>
+                <option value="5000000">5M</option>
+                <option value="5500000">5.5M</option>
+                <option value="6000000">6M</option>
+                <option value="6500000">6.5M</option>
+                <option value="7000000">7M</option>
+                <option value="7500000">7.5M</option>
+                <option value="8000000">8M</option>
+                <option value="8500000">8.5M</option>
+                <option value="9000000">9M</option>
+                <option value="9500000">9.5M</option>
+                <option value="10000000">10M</option>
+                <option value="10500000">10.5M</option>
+                <option value="11000000">11M</option>
+                <option value="11500000">11.5M</option>
+                <option value="12000000">12M</option>
+                <option value="12500000">12.5M</option>
+                <option value="13000000">13M</option>
+                <option value="13500000">13.5M</option>
+                <option value="14000000">14M</option>
+                <option value="14500000">14.5M</option>
+                <option value="15000000">15M</option>
+            </select>
+        </div>
+
+        <div class="col-md-3 filter-control">
+            <label class="filter-label" for="price-max-filter">Price (Max):</label>
+            <select class="form-select" id="price-max-filter">
+                <option value="">Select Max Price</option>
+                <option value="4000000">4M</option>
+                <option value="4500000">4.5M</option>
+                <option value="5000000">5M</option>
+                <option value="5500000">5.5M</option>
+                <option value="6000000">6M</option>
+                <option value="6500000">6.5M</option>
+                <option value="7000000">7M</option>
+                <option value="7500000">7.5M</option>
+                <option value="8000000">8M</option>
+                <option value="8500000">8.5M</option>
+                <option value="9000000">9M</option>
+                <option value="9500000">9.5M</option>
+                <option value="10000000">10M</option>
+                <option value="10500000">10.5M</option>
+                <option value="11000000">11M</option>
+                <option value="11500000">11.5M</option>
+                <option value="12000000">12M</option>
+                <option value="12500000">12.5M</option>
+                <option value="13000000">13M</option>
+                <option value="13500000">13.5M</option>
+                <option value="14000000">14M</option>
+                <option value="14500000">14.5M</option>
+                <option value="15000000">15M</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-end mt-3">
+        <button id="reset-filters" class="btn-reset me-2">
+            <i class="fas fa-undo-alt me-1"></i> Reset
+        </button>
+        <button id="apply-filters" class="btn-filter">
+            <i class="fas fa-search me-1"></i> Apply Filters
+        </button>
+    </div>
+</div>
