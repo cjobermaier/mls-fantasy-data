@@ -216,6 +216,109 @@
                 overflow-x: auto;
             }
         }
+
+        /* Add these styles to enhance multi-column sorting UI */
+            .sorting_indicator {
+                display: inline-block;
+                margin-left: 5px;
+                font-size: 0.8em;
+            }
+
+            /* Style for the info message */
+            .alert-info {
+                background-color: rgba(52, 152, 219, 0.1);
+                border-left: 4px solid var(--primary-color);
+                padding: 10px 15px;
+                border-radius: 4px;
+            }
+
+            /* Style for the current sort order display */
+            .current-sort-order {
+                background-color: rgba(52, 152, 219, 0.05);
+                padding: 5px 10px;
+                border-radius: 4px;
+                display: inline-block;
+            }
+
+            /* Highlight the sorted columns */
+            table.dataTable thead th.sorting_asc,
+            table.dataTable thead th.sorting_desc {
+                position: relative;
+            }
+
+            table.dataTable thead th.sorting_asc::after,
+            table.dataTable thead th.sorting_desc::after {
+                position: absolute;
+                right: 5px;
+                top: 50%;
+                transform: translateY(-50%);
+                opacity: 0.7;
+            }
+
+            table.dataTable thead th.sorting_asc::after {
+                content: "▲";
+            }
+
+            table.dataTable thead th.sorting_desc::after {
+                content: "▼";
+            }
+
+            /* Add numbers to indicate sort sequence for multi-column sorts */
+            table.dataTable thead th.sorting_asc.sort-1::before,
+            table.dataTable thead th.sorting_desc.sort-1::before {
+                content: "1";
+                position: absolute;
+                left: 5px;
+                top: 5px;
+                font-size: 0.7em;
+                background-color: var(--primary-color);
+                color: white;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            table.dataTable thead th.sorting_asc.sort-2::before,
+            table.dataTable thead th.sorting_desc.sort-2::before {
+                content: "2";
+                position: absolute;
+                left: 5px;
+                top: 5px;
+                font-size: 0.7em;
+                background-color: var(--primary-color);
+                color: white;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Add hover effect to make sortable columns more obvious */
+            table.dataTable thead th.sorting:hover {
+                background-color: rgba(52, 152, 219, 0.2);
+                cursor: pointer;
+            }
+
+            /* Style for the keyboard key */
+            kbd {
+                background-color: #f8f9fa;
+                border: 1px solid #d3d3d3;
+                border-radius: 3px;
+                box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+                color: #333;
+                display: inline-block;
+                font-size: 0.85em;
+                font-weight: 600;
+                line-height: 1;
+                padding: 2px 4px;
+                margin: 0 2px;
+                vertical-align: middle;
+            }
     </style>
 </head>
 <body>
@@ -518,227 +621,283 @@
     <script src="https://cdn.datatables.net/colreorder/1.6.1/js/dataTables.colReorder.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            // Initialize DataTable with more modern features
-            var table = $('#player-stats').DataTable({
-                scrollX: true,
-                fixedHeader: true,
-                colReorder: true,
-                dom: '<"top"f>rt<"bottom"lip>',
-                ordering: true,
-                pageLength: 15,
-                language: {
-                    search: "<i class='fas fa-search'></i> Search:",
-                    paginate: {
-                        first: "<i class='fas fa-angle-double-left'></i>",
-                        last: "<i class='fas fa-angle-double-right'></i>",
-                        previous: "<i class='fas fa-angle-left'></i>",
-                        next: "<i class='fas fa-angle-right'></i>"
+    $(document).ready(function() {
+        // Initialize DataTable with more modern features and multi-column sorting
+        var table = $('#player-stats').DataTable({
+            scrollX: true,
+            fixedHeader: true,
+            colReorder: true,
+            dom: '<"top"f>rt<"bottom"lip>',
+            ordering: true,
+            pageLength: 15,
+            // Enable multi-column sorting
+            orderMulti: true,
+            // Implement key modifier for multi-column sorting
+            orderCellsTop: true,
+            language: {
+                search: "<i class='fas fa-search'></i> Search:",
+                paginate: {
+                    first: "<i class='fas fa-angle-double-left'></i>",
+                    last: "<i class='fas fa-angle-double-right'></i>",
+                    previous: "<i class='fas fa-angle-left'></i>",
+                    next: "<i class='fas fa-angle-right'></i>"
+                }
+            },
+            // Default column visibility - hide some columns initially for better readability
+            columnDefs: [
+                { targets: [8, 12, 13, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30], visible: false }
+            ],
+            // Initialize with search builder but not shown
+            searchBuilder: {
+                container: $('#search-builder-container')
+            }
+        });
+
+        // Add sorting instructions to the table container (only once)
+        $('.table-container').prepend(
+            '<div class="alert alert-info mb-3">' +
+            '<i class="fas fa-info-circle me-2"></i>' +
+            '<strong>Multi-Column Sorting:</strong> ' +
+            'Hold <kbd>Shift</kbd> while clicking column headers to sort by multiple columns. ' +
+            'Example: Click "Key Passes" then Shift+Click "Goals" to sort by both.' +
+            '</div>'
+        );
+
+        // Add visual indicator for sorting order (only once)
+        $('#player-stats thead th').on('click', function() {
+            // Add a small delay to let DataTables update the sorting indicators
+            setTimeout(function() {
+                // Find all sorted columns
+                var sortedColumns = [];
+                $('#player-stats thead th').each(function(index) {
+                    if ($(this).hasClass('sorting_asc') || $(this).hasClass('sorting_desc')) {
+                        var direction = $(this).hasClass('sorting_asc') ? 'asc' : 'desc';
+                        sortedColumns.push({
+                            index: index,
+                            name: $(this).text(),
+                            direction: direction
+                        });
                     }
-                },
-                // Default column visibility - hide some columns initially for better readability
-                columnDefs: [
-                    // Update these indexes to reflect new column structure (with Team added)
-                    { targets: [8, 12, 13, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30], visible: false }
-                ],
-                // Initialize with search builder but not shown
-                searchBuilder: {
-                    container: $('#search-builder-container')
-                }
-            });
-            
-            syncButtonStates();
-            
-            // Add advanced filter toggle
-            $('#toggle-search-builder').on('click', function() {
-                $('#search-builder-container').toggle();
-                if ($('#search-builder-container').is(':visible')) {
-                    $(this).html('<i class="fas fa-times me-1"></i> Hide Advanced Filters');
-                    table.searchBuilder.rebuild();
-                } else {
-                    $(this).html('<i class="fas fa-sliders me-1"></i> Advanced Filters');
-                }
-            });
-            
-            // Export CSV button
-            $('#export-csv').on('click', function() {
-                // In a real implementation, this would generate and download a CSV
-                alert('Export functionality would be implemented here in a real app');
-            });
-            
-            // Column toggle buttons
-            $('.column-toggle-btn').on('click', function() {
-                const columnIndex = parseInt($(this).data('column'));
-                const column = table.column(columnIndex);
-                
-                // Toggle column visibility
-                column.visible(!column.visible());
-                
-                // Update this button's state
-                $(this).toggleClass('active', column.visible());
-            });
-            
-            // Show all columns
-            $('#show-all-columns').on('click', function() {
-                table.columns().visible(true);
-                $('.column-toggle-btn').addClass('active');
-                syncButtonStates();
-            });
-            
-            // Hide all columns
-            $('#hide-all-columns').on('click', function() {
-                // Keep at least the name column visible
-                table.columns().visible(false);
-                table.column(1).visible(true);
-                syncButtonStates();
-                $('.column-toggle-btn').removeClass('active');
-                $('.column-toggle-btn[data-column="1"]').addClass('active');
-            });
-            
-            // Restore default view
-            $('#restore-default-columns').on('click', function() {
-                // First, hide all columns
-                table.columns().visible(false);
-                
-                // Define which columns should be visible by default
-                const visibleColumns = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 14, 15, 16, 24];
-                syncButtonStates();
-                // Make those columns visible
-                table.columns(visibleColumns).visible(true);
-                
-                // Update all toggle buttons to match table state
-                $('.column-toggle-btn').each(function() {
-                    const columnIndex = parseInt($(this).data('column'));
-                    $(this).toggleClass('active', visibleColumns.includes(columnIndex));
                 });
-            });
-    
-            // Add this function to synchronize button states with actual column visibility
-            function syncButtonStates() {
-                $('.column-toggle-btn').each(function() {
-                    const columnIndex = parseInt($(this).data('column'));
-                    const isVisible = table.column(columnIndex).visible();
-                    $(this).toggleClass('active', isVisible);
-                });
-            }
-            
-            // Apply filters button logic
-            $('#apply-filters').on('click', function() {
-                applyFilters();
-            });
-    
-            $('#reset-filters').on('click', function() {
-                // Reset text inputs
-                $('#goal-filter').val('');
-                $('#assist-filter').val('');
-                $('#points-filter').val('');
                 
-                // Reset select elements - use multiple approaches for greater reliability
-                // Position filter
-                $('#position-filter').val('').prop('selectedIndex', 0).trigger('change');
-                
-                // Price min filter - use multiple approaches
-                $('#price-filter').val('').prop('selectedIndex', 0).trigger('change');
-                
-                // Price max filter - use multiple approaches with verification
-                if ($('#price-max-filter').length > 0) {
-                    $('#price-max-filter').val('');
-                    $('#price-max-filter').prop('selectedIndex', 0);
-                    $('#price-max-filter').trigger('change');
-                }
-                
-                // Ensure the UI reflects the changes by forcing a redraw
-                setTimeout(function() {
-                    // Clear all DataTables filters
-                    $.fn.dataTable.ext.search = [];
-                    table.search('').columns().search('').draw();
-                }, 50); // Small delay to ensure select changes have propagated
-            });
-    
-            // Function to apply all filters at once
-            function applyFilters() {
-                let positionVal = $('#position-filter').val();
-                let goalVal = $('#goal-filter').val();
-                let assistVal = $('#assist-filter').val();
-                let pointsVal = $('#points-filter').val();
-                let priceMinVal = $('#price-filter').val();
-                let priceMaxVal = $('#price-max-filter').val();
-                
-                // Clear previous filters
-                table.search('').columns().search('');
-                $.fn.dataTable.ext.search = [];
-                
-                // Apply position filter (column 7 - Positions)
-                if (positionVal) {
-                    table.column(7).search(positionVal, true, false);
-                }
-                
-                // Setup numeric filters
-                if (goalVal || assistVal || pointsVal || priceMinVal || priceMaxVal) {
-                    $.fn.dataTable.ext.search.push(
-                        function(settings, data, dataIndex) {
-                            let pass = true;
-                            
-                            // Goals filter (column 10)
-                            if (goalVal && pass) {
-                                let value = parseFloat(data[10]) || 0;
-                                pass = value >= parseFloat(goalVal);
-                            }
-                            
-                            // Assists filter (column 11)
-                            if (assistVal && pass) {
-                                let value = parseFloat(data[11]) || 0;
-                                pass = value >= parseFloat(assistVal);
-                            }
-                            
-                            // Total Points filter (column 5)
-                            if (pointsVal && pass) {
-                                let value = parseFloat(data[5]) || 0;
-                                pass = value >= parseFloat(pointsVal);
-                            }
-                            
-                            // Price filters - implemented separately for independence
-                            
-                            // Helper function to get cost value only once for both price filters
-                            let costValue;
-                            function getCostValue() {
-                                if (costValue === undefined) {
-                                    let costString = data[3]; // Cost is in column 3
-                                    costValue = parseFloat(costString.replace(/[^0-9.]/g, '')) * 1000000 || 0;
-                                }
-                                return costValue;
-                            }
-                            
-                            // Min price filter - completely independent
-                            if (priceMinVal && pass) {
-                                pass = getCostValue() >= parseFloat(priceMinVal);
-                            }
-                            
-                            // Max price filter - completely independent
-                            if (priceMaxVal && pass) {
-                                pass = getCostValue() <= parseFloat(priceMaxVal);
-                            }
-                            
-                            return pass;
+                // Display current sort order if there's more than one column being sorted
+                if (sortedColumns.length > 1) {
+                    var sortMessage = '<div class="current-sort-order mt-2 mb-2 text-primary">' +
+                        '<small><strong>Current Sort Order:</strong> ';
+                    
+                    sortedColumns.forEach(function(col, idx) {
+                        sortMessage += col.name + ' (' + (col.direction === 'asc' ? '↑' : '↓') + ')';
+                        if (idx < sortedColumns.length - 1) {
+                            sortMessage += ' → ';
                         }
-                    );
+                    });
+                    
+                    sortMessage += '</small></div>';
+                    
+                    // Add or update the sort message
+                    if ($('.current-sort-order').length) {
+                        $('.current-sort-order').remove();
+                    }
+                    $('.table-controls').prepend(sortMessage);
+                } else {
+                    // Remove the message if only one column is sorted
+                    $('.current-sort-order').remove();
                 }
-                
-                // Apply all filters
-                table.draw();
+            }, 100);
+        });
+        
+        syncButtonStates();
+        
+        // Add advanced filter toggle
+        $('#toggle-search-builder').on('click', function() {
+            $('#search-builder-container').toggle();
+            if ($('#search-builder-container').is(':visible')) {
+                $(this).html('<i class="fas fa-times me-1"></i> Hide Advanced Filters');
+                table.searchBuilder.rebuild();
+            } else {
+                $(this).html('<i class="fas fa-sliders me-1"></i> Advanced Filters');
             }
+        });
+        
+        // Export CSV button
+        $('#export-csv').on('click', function() {
+            // In a real implementation, this would generate and download a CSV
+            alert('Export functionality would be implemented here in a real app');
+        });
+        
+        // Column toggle buttons
+        $('.column-toggle-btn').on('click', function() {
+            const columnIndex = parseInt($(this).data('column'));
+            const column = table.column(columnIndex);
             
-            // Dark mode toggle
-            $('#toggleDarkMode').on('click', function() {
-                $('body').toggleClass('bg-dark text-white');
-                $('.filters-card, .table-container').toggleClass('bg-dark text-white');
-                
-                let isDarkMode = $('body').hasClass('bg-dark');
-                $(this).html(isDarkMode ? 
-                    '<i class="fas fa-sun"></i> Light Mode' : 
-                    '<i class="fas fa-moon"></i> Dark Mode');
+            // Toggle column visibility
+            column.visible(!column.visible());
+            
+            // Update this button's state
+            $(this).toggleClass('active', column.visible());
+        });
+        
+        // Show all columns
+        $('#show-all-columns').on('click', function() {
+            table.columns().visible(true);
+            $('.column-toggle-btn').addClass('active');
+            syncButtonStates();
+        });
+        
+        // Hide all columns
+        $('#hide-all-columns').on('click', function() {
+            // Keep at least the name column visible
+            table.columns().visible(false);
+            table.column(1).visible(true);
+            syncButtonStates();
+            $('.column-toggle-btn').removeClass('active');
+            $('.column-toggle-btn[data-column="1"]').addClass('active');
+        });
+        
+        // Restore default view
+        $('#restore-default-columns').on('click', function() {
+            // First, hide all columns
+            table.columns().visible(false);
+            
+            // Define which columns should be visible by default
+            const visibleColumns = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 14, 15, 16, 24];
+            syncButtonStates();
+            // Make those columns visible
+            table.columns(visibleColumns).visible(true);
+            
+            // Update all toggle buttons to match table state
+            $('.column-toggle-btn').each(function() {
+                const columnIndex = parseInt($(this).data('column'));
+                $(this).toggleClass('active', visibleColumns.includes(columnIndex));
             });
         });
+
+        // Add this function to synchronize button states with actual column visibility
+        function syncButtonStates() {
+            $('.column-toggle-btn').each(function() {
+                const columnIndex = parseInt($(this).data('column'));
+                const isVisible = table.column(columnIndex).visible();
+                $(this).toggleClass('active', isVisible);
+            });
+        }
+        
+        // Apply filters button logic
+        $('#apply-filters').on('click', function() {
+            applyFilters();
+        });
+
+        $('#reset-filters').on('click', function() {
+            // Reset text inputs
+            $('#goal-filter').val('');
+            $('#assist-filter').val('');
+            $('#points-filter').val('');
+            
+            // Reset select elements - use multiple approaches for greater reliability
+            // Position filter
+            $('#position-filter').val('').prop('selectedIndex', 0).trigger('change');
+            
+            // Price min filter - use multiple approaches
+            $('#price-filter').val('').prop('selectedIndex', 0).trigger('change');
+            
+            // Price max filter - use multiple approaches with verification
+            if ($('#price-max-filter').length > 0) {
+                $('#price-max-filter').val('');
+                $('#price-max-filter').prop('selectedIndex', 0);
+                $('#price-max-filter').trigger('change');
+            }
+            
+            // Ensure the UI reflects the changes by forcing a redraw
+            setTimeout(function() {
+                // Clear all DataTables filters
+                $.fn.dataTable.ext.search = [];
+                table.search('').columns().search('').draw();
+            }, 50); // Small delay to ensure select changes have propagated
+        });
+
+        // Function to apply all filters at once
+        function applyFilters() {
+            let positionVal = $('#position-filter').val();
+            let goalVal = $('#goal-filter').val();
+            let assistVal = $('#assist-filter').val();
+            let pointsVal = $('#points-filter').val();
+            let priceMinVal = $('#price-filter').val();
+            let priceMaxVal = $('#price-max-filter').val();
+            
+            // Clear previous filters
+            table.search('').columns().search('');
+            $.fn.dataTable.ext.search = [];
+            
+            // Apply position filter (column 7 - Positions)
+            if (positionVal) {
+                table.column(7).search(positionVal, true, false);
+            }
+            
+            // Setup numeric filters
+            if (goalVal || assistVal || pointsVal || priceMinVal || priceMaxVal) {
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        let pass = true;
+                        
+                        // Goals filter (column 10)
+                        if (goalVal && pass) {
+                            let value = parseFloat(data[10]) || 0;
+                            pass = value >= parseFloat(goalVal);
+                        }
+                        
+                        // Assists filter (column 11)
+                        if (assistVal && pass) {
+                            let value = parseFloat(data[11]) || 0;
+                            pass = value >= parseFloat(assistVal);
+                        }
+                        
+                        // Total Points filter (column 5)
+                        if (pointsVal && pass) {
+                            let value = parseFloat(data[5]) || 0;
+                            pass = value >= parseFloat(pointsVal);
+                        }
+                        
+                        // Price filters - implemented separately for independence
+                        
+                        // Helper function to get cost value only once for both price filters
+                        let costValue;
+                        function getCostValue() {
+                            if (costValue === undefined) {
+                                let costString = data[3]; // Cost is in column 3
+                                costValue = parseFloat(costString.replace(/[^0-9.]/g, '')) * 1000000 || 0;
+                            }
+                            return costValue;
+                        }
+                        
+                        // Min price filter - completely independent
+                        if (priceMinVal && pass) {
+                            pass = getCostValue() >= parseFloat(priceMinVal);
+                        }
+                        
+                        // Max price filter - completely independent
+                        if (priceMaxVal && pass) {
+                            pass = getCostValue() <= parseFloat(priceMaxVal);
+                        }
+                        
+                        return pass;
+                    }
+                );
+            }
+            
+            // Apply all filters
+            table.draw();
+        }
+        
+        // Dark mode toggle
+        $('#toggleDarkMode').on('click', function() {
+            $('body').toggleClass('bg-dark text-white');
+            $('.filters-card, .table-container').toggleClass('bg-dark text-white');
+            
+            let isDarkMode = $('body').hasClass('bg-dark');
+            $(this).html(isDarkMode ? 
+                '<i class="fas fa-sun"></i> Light Mode' : 
+                '<i class="fas fa-moon"></i> Dark Mode');
+        });
+    });
     </script>
 </body>
 </html>
