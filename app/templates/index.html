@@ -511,14 +511,15 @@
                 },
                 // Default column visibility - hide some columns initially for better readability
                 columnDefs: [
-                    { targets: [7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28], visible: false }
+                    // Update these indexes to reflect new column structure (with Team added)
+                    { targets: [8, 12, 13, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29], visible: false }
                 ],
                 // Initialize with search builder but not shown
                 searchBuilder: {
                     container: $('#search-builder-container')
                 }
             });
-            
+            syncButtonStates();
             // Add advanced filter toggle
             $('#toggle-search-builder').on('click', function() {
                 $('#search-builder-container').toggle();
@@ -538,15 +539,21 @@
             
             // Column toggle buttons
             $('.column-toggle-btn').on('click', function() {
-                const column = table.column($(this).data('column'));
+                const columnIndex = parseInt($(this).data('column'));
+                const column = table.column(columnIndex);
+                
+                // Toggle column visibility
                 column.visible(!column.visible());
-                $(this).toggleClass('active');
+                
+                // Update this button's state
+                $(this).toggleClass('active', column.visible());
             });
             
             // Show all columns
             $('#show-all-columns').on('click', function() {
                 table.columns().visible(true);
                 $('.column-toggle-btn').addClass('active');
+                syncButtonStates();
             });
             
             // Hide all columns
@@ -554,25 +561,37 @@
                 // Keep at least the name column visible
                 table.columns().visible(false);
                 table.column(1).visible(true);
+                syncButtonStates();
                 $('.column-toggle-btn').removeClass('active');
                 $('.column-toggle-btn[data-column="1"]').addClass('active');
             });
             
             // Restore default view
             $('#restore-default-columns').on('click', function() {
-                // Make essential columns visible, hide others
+                // First, hide all columns
                 table.columns().visible(false);
-                table.columns([0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 14]).visible(true);
                 
-                // Update button states
-                $('.column-toggle-btn').removeClass('active');
+                // Define which columns should be visible by default
+                const visibleColumns = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 14];
+                syncButtonStates();
+                // Make those columns visible
+                table.columns(visibleColumns).visible(true);
+                
+                // Update all toggle buttons to match table state
                 $('.column-toggle-btn').each(function() {
-                    var columnIndex = $(this).data('column');
-                    if ([0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 14].includes(columnIndex)) {
-                        $(this).addClass('active');
-                    }
+                    const columnIndex = parseInt($(this).data('column'));
+                    $(this).toggleClass('active', visibleColumns.includes(columnIndex));
                 });
             });
+
+            // Add this function to synchronize button states with actual column visibility
+            function syncButtonStates() {
+                $('.column-toggle-btn').each(function() {
+                    const columnIndex = parseInt($(this).data('column'));
+                    const isVisible = table.column(columnIndex).visible();
+                    $(this).toggleClass('active', isVisible);
+                });
+            }
             
             // Apply filters button logic
             $('#apply-filters').on('click', function() {
