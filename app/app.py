@@ -8,7 +8,8 @@ app = Flask(__name__)
 def display_stats():
     """Render the main page with player statistics."""
     data = get_player_stats()
-    return render_template('index.html', data=data)
+    ga_id = os.environ.get('GA_MEASUREMENT_ID', '')
+    return render_template('index.html', data=data, ga_measurement_id=ga_id)
 
 @app.route('/api/players')
 def get_players_api():
