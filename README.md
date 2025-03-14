@@ -1,4 +1,4 @@
-# MLS Fantasy Data Viewer
+# MLS Fantasy Stats
 
 A Flask web application for viewing and analyzing MLS Fantasy player statistics.
 
