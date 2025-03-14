@@ -1,25 +1,31 @@
-from flask import Flask, render_template
-import csv
+from flask import Flask, render_template, request, jsonify
 import os
+from data_service import get_player_stats
 
 app = Flask(__name__)
 
-# Define the route to display the CSV data
 @app.route('/')
 def display_stats():
-    data = []
-    # Use an absolute path to the CSV file in the Docker container
-    csv_file_path = os.path.join(os.path.dirname(__file__), 'player_stats.csv')
-    
-    try:
-        with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                data.append(row)
-    except FileNotFoundError:
-        print(f"CSV file not found: {csv_file_path}")
-    
+    """Render the main page with player statistics."""
+    data = get_player_stats()
     return render_template('index.html', data=data)
+
+@app.route('/api/players')
+def get_players_api():
+    """API endpoint to return player data as JSON."""
+    data = get_player_stats()
+    return jsonify(data)
+
+@app.after_request
+def add_header(response):
+    if 'Cache-Control' not in response.headers:
+        if 'static' in request.path:
+            # Cache static assets for 1 week
+            response.headers['Cache-Control'] = 'public, max-age=604800'
+        else:
+            # No caching for dynamic content
+            response.headers['Cache-Control'] = 'no-store'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)

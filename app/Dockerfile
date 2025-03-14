@@ -1,26 +1,28 @@
-# Use an official Nginx image to serve the files
-FROM nginx:alpine
+# Use an official Python image
+FROM python:3.9-slim
 
-# Install Python and dependencies
-RUN apk add --no-cache python3 py3-pip python3-dev build-base
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Create a virtual environment
-RUN python3 -m venv /venv
-
-# Install Flask within the virtual environment
-RUN /venv/bin/pip install flask
-
-# Set up the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy your project files into the container
-COPY . /app
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the CSV file into the container
-COPY player_stats.csv /app/
+# Install Python dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port the app will run on
+# Copy the application code
+COPY . /app/
+
+# Expose the port
 EXPOSE 80
 
-# Set the entrypoint to use the virtual environment
-CMD ["/venv/bin/python", "app.py"]
+# Run the application
+CMD ["python", "app.py"]
