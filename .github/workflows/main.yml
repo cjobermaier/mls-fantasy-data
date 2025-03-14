@@ -24,6 +24,9 @@ jobs:
       - name: Move CSV  
         run: mv player_stats.csv app
       
+      - name: Set environment variables in Fly
+        run: flyctl secrets set GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }}
+
       - name: Deploy
         working-directory: ./app
         run: flyctl deploy
