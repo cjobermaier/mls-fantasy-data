@@ -546,7 +546,9 @@
                     container: $('#search-builder-container')
                 }
             });
+            
             syncButtonStates();
+            
             // Add advanced filter toggle
             $('#toggle-search-builder').on('click', function() {
                 $('#search-builder-container').toggle();
@@ -610,7 +612,7 @@
                     $(this).toggleClass('active', visibleColumns.includes(columnIndex));
                 });
             });
-
+    
             // Add this function to synchronize button states with actual column visibility
             function syncButtonStates() {
                 $('.column-toggle-btn').each(function() {
@@ -620,11 +622,11 @@
                 });
             }
             
-           // Apply filters button logic
+            // Apply filters button logic
             $('#apply-filters').on('click', function() {
                 applyFilters();
             });
-
+    
             // Reset filters button logic
             $('#reset-filters').on('click', function() {
                 // Reset all filter input values and trigger change event
@@ -633,33 +635,35 @@
                 $('#assist-filter').val('');
                 $('#points-filter').val('');
                 
-                // Reset price filter specifically - handle as select element
+                // Reset price filters - both min and max
                 $('#price-filter').prop('selectedIndex', 0).trigger('change');
+                $('#price-max-filter').prop('selectedIndex', 0).trigger('change');
                 
                 // Clear all filters from DataTables
                 $.fn.dataTable.ext.search = [];
                 table.search('').columns().search('').draw();
             });
-
+    
             // Function to apply all filters at once
             function applyFilters() {
                 let positionVal = $('#position-filter').val();
                 let goalVal = $('#goal-filter').val();
                 let assistVal = $('#assist-filter').val();
                 let pointsVal = $('#points-filter').val();
-                let priceVal = $('#price-filter').val();
+                let priceMinVal = $('#price-filter').val();
+                let priceMaxVal = $('#price-max-filter').val();
                 
                 // Clear previous filters
                 table.search('').columns().search('');
                 $.fn.dataTable.ext.search = [];
                 
-                // Apply position filter (column 7 - Positions, not 6)
+                // Apply position filter (column 7 - Positions)
                 if (positionVal) {
                     table.column(7).search(positionVal, true, false);
                 }
                 
                 // Setup numeric filters
-                if (goalVal || assistVal || pointsVal || priceVal) {
+                if (goalVal || assistVal || pointsVal || priceMinVal || priceMaxVal) {
                     $.fn.dataTable.ext.search.push(
                         function(settings, data, dataIndex) {
                             let pass = true;
@@ -682,13 +686,22 @@
                                 pass = value >= parseFloat(pointsVal);
                             }
                             
-                            // Price filter (column 3 - Cost)
-                            if (priceVal && pass) {
+                            // Price filters (column 3 - Cost)
+                            if ((priceMinVal || priceMaxVal) && pass) {
                                 // Convert price string to numeric value for comparison
                                 let costString = data[3];
-                                // Remove non-numeric characters if present
+                                // Remove non-numeric characters if present and convert to a number
                                 let costValue = parseFloat(costString.replace(/[^0-9.]/g, '')) * 1000000 || 0;
-                                pass = costValue >= parseFloat(priceVal);
+                                
+                                // Check minimum price
+                                if (priceMinVal && pass) {
+                                    pass = costValue >= parseFloat(priceMinVal);
+                                }
+                                
+                                // Check maximum price
+                                if (priceMaxVal && pass) {
+                                    pass = costValue <= parseFloat(priceMaxVal);
+                                }
                             }
                             
                             return pass;
@@ -699,7 +712,6 @@
                 // Apply all filters
                 table.draw();
             }
-                $.fn.dataTable.ext.search.pop(); // Remove the filter after applying
             
             // Dark mode toggle
             $('#toggleDarkMode').on('click', function() {
