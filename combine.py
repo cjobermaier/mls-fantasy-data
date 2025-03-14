@@ -205,10 +205,10 @@ def calculate_player_points(game_stats, fantasy_stats, team_dict):
         'Player ID': fantasy_stats['id'],
         'Name': f"{fantasy_stats['first_name']} {fantasy_stats['last_name']}",
         'Team': team_name,  # Add team name here
-        'Cost': fantasy_stats['cost'],
+        'Cost': f"${fantasy_stats['cost'] / 1_000_000:.1f}M",  # Format as million with one decimal place
         'Total Points': fantasy_stats['total_points'],
         'Average Points': fantasy_stats['avg_points'],
-        'Owned By': fantasy_stats['owned_by'],
+        'Owned By': f"{fantasy_stats['owned_by']:.2f}%",
         'High Score': fantasy_stats['high_score'],
         'Low Score': fantasy_stats['low_score'],
         'Positions': ', '.join(map(str, fantasy_stats['positions'])),
