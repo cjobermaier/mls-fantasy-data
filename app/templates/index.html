@@ -627,21 +627,32 @@
                 applyFilters();
             });
     
-            // Reset filters button logic
             $('#reset-filters').on('click', function() {
-                // Reset all filter input values and trigger change event
-                $('#position-filter').val('').trigger('change');
+                // Reset text inputs
                 $('#goal-filter').val('');
                 $('#assist-filter').val('');
                 $('#points-filter').val('');
                 
-                // Reset price filters - both min and max
-                $('#price-filter').prop('selectedIndex', 0).trigger('change');
-                $('#price-max-filter').prop('selectedIndex', 0).trigger('change');
+                // Reset select elements - use multiple approaches for greater reliability
+                // Position filter
+                $('#position-filter').val('').prop('selectedIndex', 0).trigger('change');
                 
-                // Clear all filters from DataTables
-                $.fn.dataTable.ext.search = [];
-                table.search('').columns().search('').draw();
+                // Price min filter - use multiple approaches
+                $('#price-filter').val('').prop('selectedIndex', 0).trigger('change');
+                
+                // Price max filter - use multiple approaches with verification
+                if ($('#price-max-filter').length > 0) {
+                    $('#price-max-filter').val('');
+                    $('#price-max-filter').prop('selectedIndex', 0);
+                    $('#price-max-filter').trigger('change');
+                }
+                
+                // Ensure the UI reflects the changes by forcing a redraw
+                setTimeout(function() {
+                    // Clear all DataTables filters
+                    $.fn.dataTable.ext.search = [];
+                    table.search('').columns().search('').draw();
+                }, 50); // Small delay to ensure select changes have propagated
             });
     
             // Function to apply all filters at once
