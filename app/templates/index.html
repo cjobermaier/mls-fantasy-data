@@ -697,22 +697,26 @@
                                 pass = value >= parseFloat(pointsVal);
                             }
                             
-                            // Price filters (column 3 - Cost)
-                            if ((priceMinVal || priceMaxVal) && pass) {
-                                // Convert price string to numeric value for comparison
-                                let costString = data[3];
-                                // Remove non-numeric characters if present and convert to a number
-                                let costValue = parseFloat(costString.replace(/[^0-9.]/g, '')) * 1000000 || 0;
-                                
-                                // Check minimum price
-                                if (priceMinVal && pass) {
-                                    pass = costValue >= parseFloat(priceMinVal);
+                            // Price filters - implemented separately for independence
+                            
+                            // Helper function to get cost value only once for both price filters
+                            let costValue;
+                            function getCostValue() {
+                                if (costValue === undefined) {
+                                    let costString = data[3]; // Cost is in column 3
+                                    costValue = parseFloat(costString.replace(/[^0-9.]/g, '')) * 1000000 || 0;
                                 }
-                                
-                                // Check maximum price
-                                if (priceMaxVal && pass) {
-                                    pass = costValue <= parseFloat(priceMaxVal);
-                                }
+                                return costValue;
+                            }
+                            
+                            // Min price filter - completely independent
+                            if (priceMinVal && pass) {
+                                pass = getCostValue() >= parseFloat(priceMinVal);
+                            }
+                            
+                            // Max price filter - completely independent
+                            if (priceMaxVal && pass) {
+                                pass = getCostValue() <= parseFloat(priceMaxVal);
                             }
                             
                             return pass;
