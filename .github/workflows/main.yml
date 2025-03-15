@@ -25,7 +25,7 @@ jobs:
         run: mv player_stats.csv app
       
       - name: Set environment variables in Fly
-        run: flyctl secrets set GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }}
+        run: flyctl secrets set GA_MEASUREMENT_ID="${{ secrets.GA_MEASUREMENT_ID }}" -a mls-fantasy-data
 
       - name: Deploy
         working-directory: ./app
