@@ -44,8 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         next: "<i class='fas fa-angle-right'></i>"
                     }
                 },
+                // Updated columnDefs with removed columns
                 columnDefs: [
-                    { targets: [8, 12, 13, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30], visible: false }
+                    { targets: [8, 12, 13, 17, 18, 19, 20, 21], visible: false }
                 ],
                 searchBuilder: {
                     container: $('#search-builder-container')
@@ -149,62 +150,120 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
+        // Helper function to get column indexes by header text
+        function getColumnIndexes(table) {
+            const columnIndexMap = {};
+            $('#player-stats thead th').each(function(index) {
+                const headerText = $(this).text().trim();
+                columnIndexMap[headerText] = index;
+            });
+            return columnIndexMap;
+        }
+        
         // Column toggle buttons
         $('.column-toggle-btn').on('click', function() {
-            const columnIndex = parseInt($(this).data('column'));
-            const column = table.column(columnIndex);
-            
-            // Toggle column visibility
-            column.visible(!column.visible());
-            
-            // Update this button's state
-            $(this).toggleClass('active', column.visible());
-            
-            // Add subtle animation to show state change
-            $(this).addClass('btn-pulse');
-            setTimeout(() => {
-                $(this).removeClass('btn-pulse');
-            }, 300);
+            try {
+                const columnIndex = parseInt($(this).data('column'));
+                console.log(`Toggle button clicked for column ${columnIndex}`);
+                
+                // Check if column exists
+                if (columnIndex < 0 || columnIndex >= table.columns().nodes().length) {
+                    console.error(`Column index ${columnIndex} is out of bounds`);
+                    showToast(`Column index error: ${columnIndex}`, 'danger');
+                    return;
+                }
+                
+                const column = table.column(columnIndex);
+                const newState = !column.visible();
+                
+                // Toggle column visibility
+                column.visible(newState);
+                
+                // Update this button's state
+                $(this).toggleClass('active', newState);
+                console.log(`Column ${columnIndex} visibility set to ${newState}`);
+                
+                // Add subtle animation to show state change
+                $(this).addClass('btn-pulse');
+                setTimeout(() => {
+                    $(this).removeClass('btn-pulse');
+                }, 300);
+            } catch (e) {
+                console.error('Error toggling column:', e);
+                showToast('Error toggling column visibility', 'danger');
+            }
         });
         
         // Show all columns
         $('#show-all-columns').on('click', function() {
-            table.columns().visible(true);
-            $('.column-toggle-btn').addClass('active');
-            syncButtonStates(table);
+            console.log('Show all columns clicked');
             
-            // Add feedback for user
+            // Make all columns visible
+            table.columns().visible(true);
+            
+            // Update UI to reflect changes
+            $('.column-toggle-btn').addClass('active');
+            
+            console.log('All columns should now be visible');
             showToast('All columns are now visible', 'success');
         });
-        
+
         // Hide all columns
         $('#hide-all-columns').on('click', function() {
-            // Keep at least the name column visible
+            console.log('Hide all columns clicked');
+            
+            // Hide all columns first
             table.columns().visible(false);
+            
+            // Make the Name column visible
             table.column(1).visible(true);
-            syncButtonStates(table);
+            
+            // Update button states
             $('.column-toggle-btn').removeClass('active');
             $('.column-toggle-btn[data-column="1"]').addClass('active');
             
-            // Add feedback for user
+            console.log('All columns except Name should now be hidden');
             showToast('All columns except Name are now hidden', 'info');
         });
-        
+
         // Restore default view
         $('#restore-default-columns').on('click', function() {
+            console.log('Restore default columns clicked');
+            
             // First, hide all columns
             table.columns().visible(false);
             
-            // Define which columns should be visible by default
-            const visibleColumns = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 14, 15, 16, 24];
+            // Get dynamic column indexes
+            const columnMap = getColumnIndexes(table);
+            console.log('Current column index map:', columnMap);
             
-            // Make those columns visible
-            table.columns(visibleColumns).visible(true);
+            // Define columns to show by name (more reliable than indexes)
+            const columnsToShow = [
+                'Player ID', 'Name', 'Team', 'Cost', 'Owned By', 
+                'Total Points', 'Average Points', 'Positions', 
+                'Minutes', 'Goals', 'Assists', 
+                'Goals Conceded', 'Clean Sheets', 'Shots on Goal',
+                'Key Passes', 'Clearances'
+            ];
             
-            // Update all toggle buttons to match table state
-            syncButtonStates(table);
+            // Show each column if it exists
+            columnsToShow.forEach(colName => {
+                if (columnMap[colName] !== undefined) {
+                    table.column(columnMap[colName]).visible(true);
+                    console.log(`Making column visible: ${colName} (index: ${columnMap[colName]})`);
+                } else {
+                    console.log(`Column not found: ${colName}`);
+                }
+            });
             
-            // Add feedback for user
+            // Update all toggle buttons
+            $('.column-toggle-btn').each(function() {
+                const colIndex = parseInt($(this).data('column'));
+                const isVisible = table.column(colIndex).visible();
+                $(this).toggleClass('active', isVisible);
+            });
+            
+            console.log('Default columns should now be restored');
             showToast('Default column view restored', 'success');
         });
         
@@ -228,13 +287,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Helper function to update category counters
     function updateCategoryCounters() {
-        // Define category ranges
+        // Define category ranges - Updated to exclude removed columns
         const categories = {
             'basic': [0, 1, 2, 3, 4, 7],
             'points': [5, 6, 8],
             'offensive': [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
-            'defensive': [22, 23, 24, 25, 26, 27],
-            'other': [28, 29, 30]
+            'defensive': [22, 23], // Modified to remove columns 22, 23, 26, 27
+            'other': [24, 25] // Modified to remove column 29
         };
         
         // For each category, count visible columns
