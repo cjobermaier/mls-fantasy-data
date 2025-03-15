@@ -81,31 +81,33 @@ def extract_fantasy_stats(player_data, player_id):
 
 def calculate_player_points(game_stats, fantasy_stats, team_dict):
     """Calculate fantasy points for a player based on game statistics."""
-    total_min_points = 0
-    total_gl_points = 0
-    total_ass_points = 0
-    total_gc_points = 0
-    total_cs_points = 0
-    total_gs_points = 0
-    total_ps_points = 0
-    total_pm_points = 0
-    total_yc_points = 0
-    total_rc_points = 0
-    total_og_points = 0
-    total_sgs_points = 0
-    total_fs_points = 0
-    total_pss_points = 0
-    total_aps_points = 0
-    total_crs_points = 0
-    total_kp_points = 0
-    total_asg_points = 0
-    total_sh_points = 0
-    total_cl_points = 0
-    total_int_points = 0
-    total_wf_points = 0
+    # MLSF GUI - S3 (GF - GL)
+    total_min_points = 0 # MIN total minutes player
+    total_gl_points = 0  # goals: GF - GL 
+    total_ass_points = 0 # assists: A - ASS
+    total_gc_points = 0  # goals conceded: GA - GC
+    total_cs_points = 0  # clean sheet: CS - CS
+    total_gs_points = 0  # goalkeeper saves: GS - GS
+    total_ps_points = 0  # penalty save: PS - PS
+    total_pm_points = 0  # penalty miss: PM - PM
+    total_yc_points = 0  # yellow card: Y - YC
+    total_rc_points = 0  # red card: R - RC
+    total_og_points = 0  # own goals: OG - OG
+    total_sgs_points = 0 # shots at goal: SGS - SGS
+    total_fs_points = 0  # fouls recieved: FS - FS
+    total_pss_points = 0 # pass: P - PSS
+    total_crs_points = 0 # crosses: CRS - CRS
+    total_kp_points = 0  # key pass: KP - KP
+    total_cl_points = 0  # clearance: CL - CL
+    total_wf_points = 0  # Fouls against: WF - WF
+
+    # Check player positions once from fantasy_stats
+    is_defender = 'Defender' in fantasy_stats['positions']
+    is_goalkeeper = 'Goalkeeper' in fantasy_stats['positions']
+    is_midfielder = 'Midfielder' in fantasy_stats['positions']
+    is_defender_or_goalkeeper = is_defender or is_goalkeeper
 
     for game in game_stats:
-        is_midfielder = 'MF' in game['stats'].get('positions', [])
         goals_conceded = game['stats'].get('GC', 0)
         min_played = game['stats'].get('MIN', 0)
         
@@ -115,21 +117,20 @@ def calculate_player_points(game_stats, fantasy_stats, team_dict):
         else:
             min_points = 2  # 2 points for playing over 60 minutes
             
-        # Goals points
+        # Goal points
         gl_points = game['stats'].get('GL', 0)
-        is_defender_or_goalkeeper = 'DEF' in fantasy_stats['positions'] or 'GK' in fantasy_stats['positions']
         if is_defender_or_goalkeeper:
             gl_points = gl_points * 6  # 6 points for defenders/goalkeepers
         else:
             gl_points = gl_points * 5  # 5 points for others
             
-        # Other points calculations
-        ass_points = game['stats'].get('ASS', 0) * 3
-        yc_points = game['stats'].get('YC', 0) * -1
-        rc_points = game['stats'].get('RC', 0) * -3
-        gc_points = game['stats'].get('GC', 0) * -1
+        # Goals conceded (for defenders and goalkeepers only)
+        if is_defender_or_goalkeeper:
+            gc_points = math.floor(game['stats'].get('GC', 0) / 2) * -1
+        else:
+            gc_points = 0
         
-        # Clean sheet points
+        # Clean sheet points (60+ minutes and no goals conceded)
         if min_played >= 60 and goals_conceded == 0:
             if is_defender_or_goalkeeper:
                 cs_points = 5  # 5 points for defenders or goalkeepers with a clean sheet
@@ -138,31 +139,30 @@ def calculate_player_points(game_stats, fantasy_stats, team_dict):
             else:
                 cs_points = 0  # No points for other positions
         else:
-            cs_points = 0  # No points if less than 60 minutes or goals conceded
+            cs_points = 0
             
         # Goalkeeper specific points
-        is_goalkeeper = 'GK' in game['stats'].get('positions', [])
         if is_goalkeeper:
-            gs_points = game['stats'].get('GS', 0) // 4  # Every 4 saves = 1 point
-            ps_points = game['stats'].get('PS', 0) * 5  # 5 points for every PS
+            gs_points = math.floor(game['stats'].get('GS', 0) // 4 ) # Every 4 saves = 1 point
+            ps_points = math.floor(game['stats'].get('PS', 0) * 5)  # 5 points for every penalty save
         else:
             gs_points = 0
             ps_points = 0
             
         # Other stats points
-        pm_points = game['stats'].get('PM', 0) * -2
-        og_points = game['stats'].get('OG', 0) * -2
-        sgs_points = game['stats'].get('SGS', 0) // 4
-        fs_points = game['stats'].get('FS', 0) // 4
-        pss_points = math.floor(game['stats'].get('PSS', 0) / 10)
-        aps_points = math.floor(game['stats'].get('APS', 0) / 10)
-        crs_points = game['stats'].get('CRS', 0) * 1
+        pm_points = math.floor(game['stats'].get('PM', 0) * -2)
+        og_points = math.floor(game['stats'].get('OG', 0) * -2)
+        sgs_points = math.floor(game['stats'].get('SGS', 0) // 4)
+        fs_points = math.floor(game['stats'].get('FS', 0) // 4)
+        # passes are supposed to be only if 84% accuracy but we don't have that stat
+        pss_points = math.floor(game['stats'].get('PSS', 0) / 35)
+        crs_points = math.floor(game['stats'].get('CRS', 0) / 4)
         kp_points = math.floor(game['stats'].get('KP', 0) / 4)
-        asg_points = game['stats'].get('ASG', 0) * 2
-        sh_points = math.floor(game['stats'].get('SH', 0) / 2)
-        cl_points = game['stats'].get('CL', 0) * 2
-        int_points = game['stats'].get('INT', 0) * 1
-        wf_points = game['stats'].get('WF', 0) // 4 * -1
+        cl_points = math.floor(game['stats'].get('CL', 0) * 2)
+        wf_points = math.floor(game['stats'].get('WF', 0) // 4 * -1)
+        ass_points = math.floor(game['stats'].get('ASS', 0) * 3)
+        yc_points = math.floor(game['stats'].get('YC', 0) * -1)
+        rc_points = math.floor(game['stats'].get('RC', 0) * -3)
 
         # Accumulate totals
         total_min_points += min_points
@@ -179,23 +179,33 @@ def calculate_player_points(game_stats, fantasy_stats, team_dict):
         total_sgs_points += sgs_points
         total_fs_points += fs_points
         total_pss_points += pss_points
-        total_aps_points += aps_points
         total_crs_points += crs_points
         total_kp_points += kp_points
-        total_asg_points += asg_points
-        total_sh_points += sh_points
         total_cl_points += cl_points
-        total_int_points += int_points
         total_wf_points += wf_points
 
     # Calculate total points
     total_points = (
-        total_gl_points + total_kp_points + total_ass_points + total_yc_points + total_gc_points +
-        total_cs_points + total_gs_points + total_ps_points + total_pm_points + total_og_points +
-        total_sgs_points + total_fs_points + total_pss_points + total_aps_points + total_crs_points +
-        total_asg_points + total_sh_points + total_cl_points + total_int_points + total_wf_points
+        total_min_points +
+        total_gl_points + 
+        total_ass_points + 
+        total_yc_points + 
+        total_rc_points + 
+        total_gc_points +
+        total_cs_points + 
+        total_gs_points + 
+        total_ps_points + 
+        total_pm_points + 
+        total_og_points +
+        total_sgs_points + 
+        total_fs_points + 
+        total_pss_points + 
+        total_crs_points +
+        total_kp_points + 
+        total_cl_points + 
+        total_wf_points
     )
-
+    
     # At the end, add the Team Name to your return dictionary:
     squad_id = fantasy_stats.get('squad_id', 0)
     team_name = team_dict.get(squad_id, {}).get('name', 'Unknown Team')
@@ -226,13 +236,13 @@ def calculate_player_points(game_stats, fantasy_stats, team_dict):
         'Total SGS Points': total_sgs_points,
         'Total FS Points': total_fs_points,
         'Total PSS Points': total_pss_points,
-        'Total APS Points': total_aps_points,
+        #'Total APS Points': total_aps_points,
         'Total CRS Points': total_crs_points,
         'Total KP Points': total_kp_points,
-        'Total ASG Points': total_asg_points,
-        'Total SH Points': total_sh_points,
+       # 'Total ASG Points': total_asg_points,
+        #'Total SH Points': total_sh_points,
         'Total CL Points': total_cl_points,
-        'Total INT Points': total_int_points,
+       # 'Total INT Points': total_int_points,
         'Total WF Points': total_wf_points,
         'Total Combined Points': total_points
     }
