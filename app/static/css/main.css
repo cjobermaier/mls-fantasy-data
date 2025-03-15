@@ -308,3 +308,18 @@ kbd {
         overflow-x: auto;
     }
 }
+
+.footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 0.9rem;
+}
+
+body.dark-mode .footer {
+    background-color: #2a2a2a !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .footer .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
