@@ -227,43 +227,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Restore default view
+        // Restore default view
         $('#restore-default-columns').on('click', function() {
             console.log('Restore default columns clicked');
             
             // First, hide all columns
             table.columns().visible(false);
             
-            // Get dynamic column indexes
-            const columnMap = getColumnIndexes(table);
-            console.log('Current column index map:', columnMap);
+            // Define specific columns to show by index
+            const defaultColumns = [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 14, 15, 16, 22, 24];
             
-            // Define columns to show by name (more reliable than indexes)
-            const columnsToShow = [
-                'Player ID', 'Name', 'Team', 'Cost', 'Owned By', 
-                'Total Points', 'Average Points', 'Positions', 
-                'Minutes', 'Goals', 'Assists', 
-                'Goals Conceded', 'Clean Sheets', 'Shots on Goal',
-                'Key Passes', 'Clearances'
-            ];
+            console.log('Trying to show these columns:', defaultColumns);
             
-            // Show each column if it exists
-            columnsToShow.forEach(colName => {
-                if (columnMap[colName] !== undefined) {
-                    table.column(columnMap[colName]).visible(true);
-                    console.log(`Making column visible: ${colName} (index: ${columnMap[colName]})`);
-                } else {
-                    console.log(`Column not found: ${colName}`);
+            // Show each column one by one, with error handling
+            defaultColumns.forEach(columnIndex => {
+                try {
+                    if (columnIndex < table.columns().nodes().length) {
+                        table.column(columnIndex).visible(true);
+                        console.log(`Successfully made column ${columnIndex} visible`);
+                    } else {
+                        console.warn(`Column ${columnIndex} does not exist in the table`);
+                    }
+                } catch (e) {
+                    console.error(`Error making column ${columnIndex} visible:`, e);
                 }
             });
             
-            // Update all toggle buttons
-            $('.column-toggle-btn').each(function() {
-                const colIndex = parseInt($(this).data('column'));
-                const isVisible = table.column(colIndex).visible();
-                $(this).toggleClass('active', isVisible);
-            });
+            // Always ensure at least the Name column is visible as a fallback
+            try {
+                table.column(1).visible(true);
+                console.log('Ensured Name column is visible');
+            } catch (e) {
+                console.error('Error making Name column visible:', e);
+            }
             
-            console.log('Default columns should now be restored');
+            // Update button states
+            syncButtonStates(table);
+            
+            // Add feedback for user
             showToast('Default column view restored', 'success');
         });
         
@@ -291,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const categories = {
             'basic': [0, 1, 2, 3, 4, 7],
             'points': [5, 6, 8],
-            'offensive': [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+            'offensive': [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,26],
             'defensive': [22, 23], // Modified to remove columns 22, 23, 26, 27
             'other': [24, 25] // Modified to remove column 29
         };
