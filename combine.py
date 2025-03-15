@@ -94,7 +94,7 @@ def calculate_player_points(game_stats, fantasy_stats, team_dict):
     total_rc_points = 0  # red card: R - RC
     total_og_points = 0  # own goals: OG - OG
     total_sgs_points = 0 # shots at goal: SGS - SGS
-    total_fs_points = 0  # fouls recieved: FS - FS
+    total_fs_points = 0  # fouls received: FS - FS
     total_pss_points = 0 # pass: P - PSS
     total_crs_points = 0 # crosses: CRS - CRS
     total_kp_points = 0  # key pass: KP - KP
