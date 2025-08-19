@@ -434,7 +434,7 @@ def main():
     player_ids = [player['id'] for player in all_player_data]
     
     # Limit for reasonable processing time (adjust as needed)
-    player_ids = player_ids[:50]  # Adjust as needed
+    player_ids = player_ids[:5000]  # Adjust as needed
     print(f"Processing {len(player_ids)} players...")
     
     # Fetch game stats for all players at once
