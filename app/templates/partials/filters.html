@@ -7,6 +7,16 @@
     
     <div class="row filters-row">
         <div class="col-md-3 filter-control">
+            <label class="filter-label" for="week-filter">Week:</label>
+            <select class="form-select" id="week-filter" onchange="changeWeek()">
+                <option value="">Season Total</option>
+                {% for week in available_weeks %}
+                <option value="{{ week }}" {% if selected_week == week %}selected{% endif %}>{{ week }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-3 filter-control">
             <label class="filter-label" for="position-filter">Position:</label>
             <select class="form-select" id="position-filter">
                 <option value="">All Positions</option>

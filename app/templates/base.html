@@ -45,7 +45,13 @@
         <div class="container-fluid">
             <div class="header-content">
                 <h1><i class="fas fa-futbol me-2"></i>{% block header_title %}Bleuberry FC's MLS Fantasy Stats{% endblock %}</h1>
-                <div class="d-none d-md-block">
+                <div class="header-nav">
+                    <a href="/" class="btn btn-outline-light me-2 {% if request.endpoint == 'display_stats' %}active{% endif %}">
+                        <i class="fas fa-table me-1"></i> Stats
+                    </a>
+                    <a href="/compare" class="btn btn-outline-light me-2 {% if request.endpoint == 'compare_page' %}active{% endif %}">
+                        <i class="fas fa-balance-scale me-1"></i> Compare
+                    </a>
                     <button class="btn btn-outline-light" id="toggleDarkMode">
                         <i class="fas fa-moon"></i> Dark Mode
                     </button>
