@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Player Comparison - Bleuberry FC's MLS Fantasy Stats{% endblock %}
+
+{% block header_title %}Player Comparison{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Player Selection Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Select Players to Compare</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="comparison-week-filter" class="form-label">Compare Data For:</label>
+                            <select class="form-select" id="comparison-week-filter" onchange="changeComparisonWeek()">
+                                <option value="">Season Total</option>
+                                {% for week in available_weeks %}
+                                <option value="{{ week }}" {% if selected_week == week %}selected{% endif %}>{{ week }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="player1-search" class="form-label">Player 1</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control player-search" id="player1-search" 
+                                       placeholder="Search for a player..." autocomplete="off" data-player-num="1">
+                                <div class="search-results" id="player1-results"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="player2-search" class="form-label">Player 2</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control player-search" id="player2-search" 
+                                       placeholder="Search for a player..." autocomplete="off" data-player-num="2">
+                                <div class="search-results" id="player2-results"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button class="btn btn-primary" id="compare-btn" disabled>Compare Players</button>
+                            <button class="btn btn-outline-secondary ms-2" id="add-player-btn">Add Another Player</button>
+                            <a href="/" class="btn btn-outline-secondary ms-2">Back to Stats</a>
+                        </div>
+                    </div>
+                    <div id="additional-players" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Results Section -->
+    <div class="row" id="comparison-results" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Comparison Results <span id="comparison-period-label" class="text-muted"></span></h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="comparison-table">
+                            <thead>
+                                <tr id="comparison-header">
+                                    <th>Stat</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparison-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.winner-cell {
+    background-color: #d4edda !important;
+    font-weight: bold;
+}
+.player-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.stat-label {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+.search-result-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+.search-result-item:last-child {
+    border-bottom: none;
+}
+.selected-player {
+    background-color: #e7f3ff;
+    border-color: #007bff;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let playerCount = 2;
+let comparisonData = null;
+let playersData = {{ data | tojson }};
+let selectedPlayers = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const compareBtn = document.getElementById('compare-btn');
+    const addPlayerBtn = document.getElementById('add-player-btn');
+
+    // Setup search functionality for initial players
+    setupPlayerSearch('player1-search', 1);
+    setupPlayerSearch('player2-search', 2);
+
+    function setupPlayerSearch(inputId, playerNum) {
+        const input = document.getElementById(inputId);
+        const resultsDiv = document.getElementById(`player${playerNum}-results`);
+        
+        input.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            if (query.length < 1) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            const matches = playersData.filter(player => 
+                player.Name.toLowerCase().includes(query) || 
+                player.Team.toLowerCase().includes(query)
+            ).slice(0, 10); // Limit to 10 results
+            
+            displaySearchResults(resultsDiv, matches, input, playerNum);
+        });
+        
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+    }
+
+    function displaySearchResults(resultsDiv, matches, input, playerNum) {
+        if (matches.length === 0) {
+            resultsDiv.innerHTML = '<div class="search-result-item">No players found</div>';
+            resultsDiv.style.display = 'block';
+            return;
+        }
+        
+        resultsDiv.innerHTML = matches.map(player => 
+            `<div class="search-result-item" data-player-id="${player['Player ID']}" data-player-name="${player.Name}">
+                <strong>${player.Name}</strong><br>
+                <small class="text-muted">${player.Team} - ${player.Positions}</small>
+            </div>`
+        ).join('');
+        
+        // Add click handlers for results
+        resultsDiv.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const playerId = this.dataset.playerId;
+                const playerName = this.dataset.playerName;
+                
+                input.value = playerName;
+                input.classList.add('selected-player');
+                selectedPlayers[`player${playerNum}`] = playerId;
+                resultsDiv.style.display = 'none';
+                checkSelections();
+            });
+        });
+        
+        resultsDiv.style.display = 'block';
+    }
+
+    function checkSelections() {
+        const selectedCount = Object.keys(selectedPlayers).length;
+        compareBtn.disabled = selectedCount < 2;
+    }
+
+    function getSelectedPlayers() {
+        return Object.values(selectedPlayers);
+    }
+
+    addPlayerBtn.addEventListener('click', function() {
+        if (playerCount >= 4) return; // Limit to 4 players max
+        
+        playerCount++;
+        const additionalPlayersDiv = document.getElementById('additional-players');
+        
+        const newPlayerDiv = document.createElement('div');
+        newPlayerDiv.className = 'row mt-2';
+        newPlayerDiv.innerHTML = `
+            <div class="col-md-6">
+                <label for="player${playerCount}-search" class="form-label">Player ${playerCount}</label>
+                <div class="position-relative">
+                    <input type="text" class="form-control player-search additional-player-search" 
+                           id="player${playerCount}-search" placeholder="Search for a player..." 
+                           autocomplete="off" data-player-num="${playerCount}">
+                    <div class="search-results" id="player${playerCount}-results"></div>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-outline-danger remove-player-btn">Remove</button>
+            </div>
+        `;
+        
+        additionalPlayersDiv.appendChild(newPlayerDiv);
+        
+        // Setup search for new player
+        setupPlayerSearch(`player${playerCount}-search`, playerCount);
+        
+        // Add remove button handler
+        const removeBtn = newPlayerDiv.querySelector('.remove-player-btn');
+        removeBtn.addEventListener('click', function() {
+            delete selectedPlayers[`player${playerCount}`];
+            newPlayerDiv.remove();
+            checkSelections();
+            if (playerCount < 4) {
+                addPlayerBtn.style.display = 'inline-block';
+            }
+        });
+        
+        if (playerCount >= 4) {
+            addPlayerBtn.style.display = 'none';
+        }
+    });
+
+    compareBtn.addEventListener('click', function() {
+        const selectedPlayerIds = getSelectedPlayers();
+        if (selectedPlayerIds.length < 2) return;
+        
+        const params = new URLSearchParams();
+        selectedPlayerIds.forEach(playerId => {
+            params.append('players', playerId);
+        });
+        
+        // Add week parameter if selected
+        const selectedWeek = document.getElementById('comparison-week-filter').value;
+        if (selectedWeek) {
+            params.append('week', selectedWeek);
+        }
+        
+        fetch(`/api/compare?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                displayComparison(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error comparing players');
+            });
+    });
+});
+
+function displayComparison(data) {
+    comparisonData = data;
+    const resultsDiv = document.getElementById('comparison-results');
+    const header = document.getElementById('comparison-header');
+    const body = document.getElementById('comparison-body');
+    const periodLabel = document.getElementById('comparison-period-label');
+    
+    // Update period label
+    if (data.week) {
+        periodLabel.textContent = `(${data.week})`;
+    } else {
+        periodLabel.textContent = '';
+    }
+    
+    // Clear existing content
+    header.innerHTML = '<th class="stat-label">Stat</th>';
+    body.innerHTML = '';
+    
+    // Add player headers
+    data.players.forEach(player => {
+        const th = document.createElement('th');
+        th.innerHTML = `${player.Name}<br><small class="text-muted">${player.Team}</small>`;
+        header.appendChild(th);
+    });
+    
+    // Add stat rows
+    data.stats.forEach(stat => {
+        const row = document.createElement('tr');
+        
+        // Stat name
+        const statCell = document.createElement('td');
+        statCell.className = 'stat-label';
+        statCell.textContent = stat;
+        row.appendChild(statCell);
+        
+        // Player values
+        data.players.forEach(player => {
+            const valueCell = document.createElement('td');
+            valueCell.textContent = player[stat] || '0';
+            
+            // Highlight winner
+            if (data.winner_stats[stat] === player['Player ID']) {
+                valueCell.className = 'winner-cell';
+            }
+            
+            row.appendChild(valueCell);
+        });
+        
+        body.appendChild(row);
+    });
+    
+    resultsDiv.style.display = 'block';
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function changeComparisonWeek() {
+    const weekSelect = document.getElementById('comparison-week-filter');
+    const selectedWeek = weekSelect.value;
+    
+    // Build the URL with the week parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (selectedWeek) {
+        urlParams.set('week', selectedWeek);
+    } else {
+        urlParams.delete('week');
+    }
+    
+    // Navigate to the new URL to reload with correct player data
+    const newUrl = window.location.pathname + '?' + urlParams.toString();
+    window.location.href = newUrl.replace('?', urlParams.toString() ? '?' : '');
+}
+</script>
+{% endblock %}

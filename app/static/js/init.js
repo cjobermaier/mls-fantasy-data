@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 pageLength: 15,
                 orderMulti: true,
                 orderCellsTop: true,
+                orderFixed: [],
+                stateSave: false,
                 language: {
                     search: "<i class='fas fa-search'></i> Search:",
                     paginate: {
@@ -46,7 +48,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 // Updated columnDefs with removed columns
                 columnDefs: [
-                    { targets: [8, 12, 13, 17, 18, 19, 20, 21], visible: false }
+                    { targets: [8, 12, 13, 17, 18, 19, 20, 21], visible: false },
+                    { targets: [0], type: 'num' }, // Player ID
+                    { targets: [3, 5, 6], type: 'num' }, // Cost, Total Points, Average Points  
+                    { targets: [9, 10, 11, 14, 15, 16, 22, 24, 25, 26], type: 'num' }, // All numeric columns
+                    { targets: '_all', orderSequence: ['desc', 'asc'] }
                 ],
                 searchBuilder: {
                     container: $('#search-builder-container')
@@ -77,9 +83,15 @@ document.addEventListener('DOMContentLoaded', function() {
             '</div>'
         );
         
-        // Setup sorting indicators
-        $('#player-stats thead th').on('click', function() {
+        // Setup sorting indicators using DataTables events instead of custom click handlers
+        table.on('order.dt', function() {
             setTimeout(updateSortIndicators, 100);
+        });
+        
+        // Ensure multi-column sorting is properly enabled
+        table.on('draw.dt', function() {
+            // Add visual indicator for shift+click functionality
+            $('#player-stats thead th').attr('title', 'Click to sort, Shift+Click for multi-column sort');
         });
         
         // Column visibility toggles
@@ -102,16 +114,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to update sort indicators
     function updateSortIndicators() {
+        const table = window.MLSFantasy.dataTable;
+        if (!table) return;
+        
+        // Get current sort order from DataTables API
+        var currentOrder = table.order();
         var sortedColumns = [];
-        $('#player-stats thead th').each(function(index) {
-            if ($(this).hasClass('sorting_asc') || $(this).hasClass('sorting_desc')) {
-                var direction = $(this).hasClass('sorting_asc') ? 'asc' : 'desc';
-                sortedColumns.push({
-                    index: index,
-                    name: $(this).text(),
-                    direction: direction
-                });
-            }
+        
+        currentOrder.forEach(function(orderInfo) {
+            var columnIndex = orderInfo[0];
+            var direction = orderInfo[1];
+            var columnHeader = $(table.column(columnIndex).header());
+            var columnName = columnHeader.text().trim();
+            
+            sortedColumns.push({
+                index: columnIndex,
+                name: columnName,
+                direction: direction
+            });
         });
         
         if (sortedColumns.length > 1) {
@@ -606,3 +626,22 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(styleSheet);
 });
+
+// Function to handle week changes
+function changeWeek() {
+    const weekSelect = document.getElementById('week-filter');
+    const selectedWeek = weekSelect.value;
+    
+    // Build the URL with the week parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (selectedWeek) {
+        urlParams.set('week', selectedWeek);
+    } else {
+        urlParams.delete('week');
+    }
+    
+    // Navigate to the new URL
+    const newUrl = window.location.pathname + '?' + urlParams.toString();
+    window.location.href = newUrl.replace('?', urlParams.toString() ? '?' : '');
+}
