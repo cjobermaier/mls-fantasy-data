@@ -36,8 +36,8 @@ def compare_api():
     player_ids = request.args.getlist('players')
     week = request.args.get('week')
     
-    if len(player_ids) < 2:
-        return jsonify({'error': 'At least 2 players required for comparison'}), 400
+    if len(player_ids) < 1:
+        return jsonify({'error': 'At least 1 player required for comparison'}), 400
     
     if week:
         comparison_data = compare_players_weekly(player_ids, week)
@@ -45,6 +45,16 @@ def compare_api():
         comparison_data = compare_players(player_ids)
     
     return jsonify(comparison_data)
+
+@app.route('/draft')
+def mock_draft():
+    """Render the mock draft page."""
+    week = request.args.get('week')
+    data = get_weekly_player_stats(week) if week else get_player_stats()
+    available_weeks = get_available_weeks()
+    ga_id = os.environ.get('GA_MEASUREMENT_ID', '')
+    return render_template('draft.html', data=data, available_weeks=available_weeks,
+                         selected_week=week, ga_measurement_id=ga_id)
 
 @app.after_request
 def add_header(response):

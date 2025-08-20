@@ -25,6 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Add custom sorting for data-sort attributes
+        $.fn.dataTable.ext.order['dom-data-sort'] = function(settings, col) {
+            return this.api().column(col, {order: 'index'}).nodes().map(function(td) {
+                var sortValue = $(td).attr('data-sort');
+                return sortValue ? parseFloat(sortValue) || 0 : 0;
+            });
+        };
+        
         try {
             var table = $('#player-stats').DataTable({
                 scrollX: true,
@@ -48,10 +56,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 // Updated columnDefs with removed columns
                 columnDefs: [
-                    { targets: [8, 12, 13, 17, 18, 19, 20, 21], visible: false },
+                    { targets: [8, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], visible: false },
                     { targets: [0], type: 'num' }, // Player ID
                     { targets: [3, 5, 6], type: 'num' }, // Cost, Total Points, Average Points  
-                    { targets: [9, 10, 11, 14, 15, 16, 22, 24, 25, 26], type: 'num' }, // All numeric columns
+                    { 
+                        targets: [9, 10, 11, 12, 13, 14, 15], // Minutes, Goals, Assists, YC, RC, GC, CS columns
+                        type: 'num',
+                        orderDataType: 'dom-data-sort' // Use data-sort attribute for sorting
+                    },
                     { targets: '_all', orderSequence: ['desc', 'asc'] }
                 ],
                 searchBuilder: {

@@ -39,30 +39,403 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/banner.css') }}">
     
     {% block extra_css %}{% endblock %}
+
+    <style>
+        /* Modern base styling */
+        :root {
+            --primary-color: #1a5f3f;
+            --secondary-color: #2d8f5a;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-text: #2c3e50;
+            --light-text: #7f8c8d;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.08);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.12);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--dark-text);
+        }
+
+        /* Enhanced Modern Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, #4a9eff 100%);
+            color: white;
+            padding: 0;
+            margin-bottom: 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .header h1 i {
+            font-size: 2.2rem;
+            animation: footballSpin 3s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes footballSpin {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-5deg) scale(1.05); }
+            50% { transform: rotate(0deg) scale(1); }
+            75% { transform: rotate(5deg) scale(1.05); }
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .brand-text .main-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ffffff 0%, #f0f8ff 50%, #e6f3ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-text .subtitle {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: -2px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-nav .btn {
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-nav .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .header-nav .btn:hover::before {
+            left: 100%;
+        }
+
+        .header-nav .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-nav .btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-nav .btn i {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .header-nav .btn:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Floating elements for visual interest */
+        .header-floating-element {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+            color: white;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .header-floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            font-size: 1.5rem;
+            animation-delay: 0s;
+        }
+
+        .header-floating-element:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            font-size: 1.2rem;
+            animation-delay: 2s;
+        }
+
+        .header-floating-element:nth-child(3) {
+            bottom: 15%;
+            left: 20%;
+            font-size: 1rem;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* Main content area */
+        .container-fluid {
+            padding: 0;
+        }
+
+        /* Global improvements */
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        /* Card styling */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Footer improvements */
+        .footer {
+            background: var(--bg-primary);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--light-text);
+            font-size: 0.9rem;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            --bg-primary: #2c3e50;
+            --bg-secondary: #34495e;
+            --dark-text: #ecf0f1;
+            --light-text: #bdc3c7;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #1a252f 0%, #2c3e50 50%, #34495e 100%);
+        }
+        
+        body.dark-mode .brand-text .main-title {
+            background: linear-gradient(45deg, #ffffff 0%, #ecf0f1 50%, #bdc3c7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-mode .footer {
+            background: var(--bg-secondary);
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px 20px;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .brand-text .main-title {
+                font-size: 1.6rem;
+            }
+            
+            .brand-text .subtitle {
+                font-size: 0.7rem;
+            }
+            
+            .header-nav {
+                justify-content: center;
+                width: 100%;
+                gap: 8px;
+            }
+            
+            .header-nav .btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            
+            .header-floating-element {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-content {
+                padding: 12px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .brand-text .main-title {
+                font-size: 1.4rem;
+            }
+            
+            .brand-text .subtitle {
+                font-size: 0.65rem;
+            }
+            
+            .header-nav .btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+                gap: 4px;
+            }
+            
+            .header-nav .btn span {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="header">
+        <!-- Floating decorative elements -->
+        <div class="header-floating-element"><i class="fas fa-futbol"></i></div>
+        <div class="header-floating-element"><i class="fas fa-trophy"></i></div>
+        <div class="header-floating-element"><i class="fas fa-star"></i></div>
+        
         <div class="container-fluid">
             <div class="header-content">
-                <h1><i class="fas fa-futbol me-2"></i>{% block header_title %}Bleuberry FC's MLS Fantasy Stats{% endblock %}</h1>
+                <div class="header-brand">
+                    <h1>
+                        <i class="fas fa-futbol"></i>
+                        <div class="brand-text">
+                            <span class="main-title">{% block header_title %}Bleuberry FC{% endblock %}</span>
+                            <span class="subtitle">MLS Fantasy Analytics</span>
+                        </div>
+                    </h1>
+                </div>
                 <div class="header-nav">
-                    <a href="/" class="btn btn-outline-light me-2 {% if request.endpoint == 'display_stats' %}active{% endif %}">
-                        <i class="fas fa-table me-1"></i> Stats
+                    <a href="/" class="btn {% if request.endpoint == 'display_stats' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i> Stats
                     </a>
-                    <a href="/compare" class="btn btn-outline-light me-2 {% if request.endpoint == 'compare_page' %}active{% endif %}">
-                        <i class="fas fa-balance-scale me-1"></i> Compare
+                    <a href="/compare" class="btn {% if request.endpoint == 'compare_page' %}active{% endif %}">
+                        <i class="fas fa-balance-scale"></i> Compare
                     </a>
-                    <button class="btn btn-outline-light" id="toggleDarkMode">
-                        <i class="fas fa-moon"></i> Dark Mode
+                    <a href="/draft" class="btn {% if request.endpoint == 'mock_draft' %}active{% endif %}">
+                        <i class="fas fa-users"></i> Draft
+                    </a>
+                    <button class="btn" id="toggleDarkMode">
+                        <i class="fas fa-moon"></i> <span class="d-none d-sm-inline">Theme</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container-fluid">
-        {% block content %}{% endblock %}
-    </div>
+    {% block content %}{% endblock %}
 
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

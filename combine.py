@@ -61,11 +61,47 @@ def fetch_all_game_stats(player_ids):
     return player_game_stats
 
 def determine_week_from_match_id(match_id):
-    """Determine the week/round from match_id using full season distribution."""
+    """Determine the week/round from match_id using chronological ordering."""
     try:
-        # Use full MLS season range (1-28) based on match_id
-        # This distributes matches across the complete season
-        week_num = (hash(str(match_id)) % 28) + 1  # Weeks 1-28
+        # Match IDs are in YYYYMMDD format
+        match_num = int(match_id)
+        
+        # Define rough chronological ranges for MLS weeks based on match IDs
+        # This is based on the observation that matches start around 20250104
+        if match_num >= 20250000:  # 2025 season dates
+            # Map date ranges to weeks more accurately
+            if match_num <= 20250115:  # Early January
+                week_num = 1
+            elif match_num <= 20250215:  # Mid January to mid February
+                week_num = 2
+            elif match_num <= 20250315:  # Mid February to mid March  
+                week_num = 3
+            elif match_num <= 20250415:  # Mid March to mid April
+                week_num = 4
+            elif match_num <= 20250515:  # Mid April to mid May
+                week_num = 5
+            elif match_num <= 20250615:  # Mid May to mid June
+                week_num = 6
+            elif match_num <= 20250715:  # Mid June to mid July
+                week_num = 7
+            elif match_num <= 20250815:  # Mid July to mid August
+                week_num = 8
+            elif match_num <= 20250915:  # Mid August to mid September
+                week_num = 9
+            elif match_num <= 20251015:  # Mid September to mid October
+                week_num = 10
+            elif match_num <= 20251115:  # Mid October to mid November
+                week_num = 11
+            elif match_num <= 20251215:  # Mid November to mid December
+                week_num = 12
+            else:
+                # Later dates spread across remaining weeks
+                week_num = min(28, max(13, ((match_num - 20251215) // 100) + 13))
+        else:
+            # Fallback for non-date match IDs
+            week_num = (match_num % 28) + 1
+        
+        week_num = max(1, min(28, week_num))
         return f"Week {week_num}"
     except:
         return "Week 14"  # Default fallback
@@ -433,8 +469,7 @@ def main():
     # Extract player IDs
     player_ids = [player['id'] for player in all_player_data]
     
-    # Limit for reasonable processing time (adjust as needed)
-    player_ids = player_ids[:5000]  # Adjust as needed
+    # Process all players for complete data
     print(f"Processing {len(player_ids)} players...")
     
     # Fetch game stats for all players at once

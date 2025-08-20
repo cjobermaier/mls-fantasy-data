@@ -1,88 +1,177 @@
-<!-- Table Container -->
-<div class="table-container">
-    <div class="table-controls">
-        <div>
-            <button class="btn btn-sm btn-outline-primary me-2" id="export-csv">
-                <i class="fas fa-file-export me-1"></i> Export CSV
-            </button>
-            <button class="btn btn-sm btn-outline-secondary me-2" id="toggle-search-builder">
-                <i class="fas fa-sliders me-1"></i> Advanced Filters
-            </button>
-            <a href="/compare" class="btn btn-sm btn-outline-success">
-                <i class="fas fa-balance-scale me-1"></i> Compare Players
-            </a>
+<!-- Modern Table Container -->
+<div class="content-wrapper">
+    <div class="table-container slide-up">
+        <div class="table-header">
+            <h3>
+                <i class="fas fa-chart-bar"></i>
+                Player Statistics
+            </h3>
+            <div class="table-actions">
+                <button class="btn btn-outline-light me-2" id="export-csv">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-outline-light me-2" id="toggle-search-builder">
+                    <i class="fas fa-sliders-h"></i> Advanced
+                </button>
+                <a href="/compare" class="btn btn-outline-light">
+                    <i class="fas fa-balance-scale"></i> Compare
+                </a>
+            </div>
         </div>
-        <div class="table-info">
-            <i class="fas fa-info-circle me-1"></i> Scroll horizontally to see all stats
+        
+        <div class="table-body">
+            <div id="search-builder-container" style="display: none; margin-bottom: 20px;"></div>
+            
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <strong>Pro Tip:</strong> Use horizontal scroll to view all statistics, or click column headers to sort data.
+            </div>
+            
+            <table id="player-stats" class="table display nowrap" width="100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>💰 Cost</th>
+                        <th>📊 Owned By</th>
+                        <th>🎯 Total Pts</th>
+                        <th>📈 Avg Pts</th>
+                        <th>⚽ Position</th>
+                        <th>🏆 Combined</th>
+                        <th>⏱️ Minutes</th>
+                        <th>🥅 Goals</th>
+                        <th>🎯 Assists</th>
+                        <th>🟨 Yellow</th>
+                        <th>🟥 Red</th>
+                        <th>⛔ Conceded</th>
+                        <th>🛡️ Clean Sheets</th>
+                        <th>🥊 Saves</th>
+                        <th>🚫 Pen Saves</th>
+                        <th>❌ Pen Miss</th>
+                        <th>⚡ Own Goals</th>
+                        <th>🎯 Shots</th>
+                        <th>🚫 Fouls</th>
+                        <th>🗝️ Key Pass</th>
+                        <th>✈️ Crosses</th>
+                        <th>🧹 Clearances</th>
+                        <th>🤝 Won Fouls</th>
+                        <th>📤 Passes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td>{{ row['Player ID'] }}</td>
+                        <td class="player-name-cell">
+                            <strong>{{ row['Name'] }}</strong>
+                        </td>
+                        <td>{{ row['Team'] }}</td>
+                        <td class="cost-cell">{{ row['Cost'] }}</td>
+                        <td>{{ row['Owned By'] }}</td>
+                        <td class="stat-highlight">{{ row['Total Points'] }}</td>
+                        <td>{{ row['Average Points'] }}</td>
+                        <td class="position-cell">{{ row['Positions'] }}</td>
+                        <td class="combined-pts">{{ row['Total Combined Points'] }}</td>
+                        <td data-sort="{{ row['Total MIN Points'] }}">
+                            <span class="stat-value">{{ row['Total MIN Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual Minutes'] }})</small>
+                        </td>
+                        <td data-sort="{{ row['Total GL Points'] }}">
+                            <span class="stat-value">{{ row['Total GL Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual Goals'] }})</small>
+                        </td>
+                        <td data-sort="{{ row['Total ASS Points'] }}">
+                            <span class="stat-value">{{ row['Total ASS Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual Assists'] }})</small>
+                        </td>
+                        <td data-sort="{{ row['Total YC Points'] }}">
+                            <span class="stat-value">{{ row['Total YC Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual YC'] }})</small>
+                        </td>
+                        <td data-sort="{{ row['Total RC Points'] }}">
+                            <span class="stat-value">{{ row['Total RC Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual RC'] }})</small>
+                        </td>
+                        <td data-sort="{{ row['Total GC Points'] }}">
+                            <span class="stat-value">{{ row['Total GC Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual GC'] }})</small>
+                        </td>
+                        <td data-sort="{{ row['Total CS Points'] }}">
+                            <span class="stat-value">{{ row['Total CS Points'] }}</span>
+                            <small class="text-muted">({{ row['Actual CS'] }})</small>
+                        </td>
+                        <td>{{ row['Total GS Points'] }}</td>
+                        <td>{{ row['Total PS Points'] }}</td>
+                        <td>{{ row['Total PM Points'] }}</td>
+                        <td>{{ row['Total OG Points'] }}</td>
+                        <td>{{ row['Total SGS Points'] }}</td>
+                        <td>{{ row['Total FS Points'] }}</td>
+                        <td>{{ row['Total KP Points'] }}</td>
+                        <td>{{ row['Total CRS Points'] }}</td>
+                        <td>{{ row['Total CL Points'] }}</td>
+                        <td>{{ row['Total WF Points'] }}</td>
+                        <td>{{ row['Total PSS Points'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-    
-    <div id="search-builder-container" style="display: none; margin-bottom: 20px;"></div>
-    
-    <table id="player-stats" class="table table-striped table-hover display nowrap" width="100%">
-        <thead>
-            <tr>
-                <th>Player ID</th>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Cost</th>
-                <th>Owned By</th>
-                <th>Total Points</th>
-                <th>Average Points</th>
-                <th>Positions</th>
-                <th>Combined Pts</th>
-                <th>Minutes</th>
-                <th>Goals</th>
-                <th>Assists</th>
-                <th>Yellow Cards</th>
-                <th>Red Cards</th>
-                <th>Goals Conceded</th>
-                <th>Clean Sheets</th>
-                <th>Saved Goals</th>
-                <th>Penalty Saved</th>
-                <th>Penalty Missed</th>
-                <th>Own Goals</th>
-                <th>Shots on Goal</th>
-                <th>Fouls</th>
-                <th>Key Passes</th>
-                <th>Crosses</th>
-                <th>Clearances</th>
-                <th>Won Fouls</th>
-                <th>Passes</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in data %}
-            <tr>
-                <td>{{ row['Player ID'] }}</td>
-                <td>{{ row['Name'] }}</td>
-                <td>{{ row['Team'] }}</td>
-                <td>{{ row['Cost'] }}</td>
-                <td>{{ row['Owned By'] }}</td>
-                <td class="stat-highlight">{{ row['Total Points'] }}</td>
-                <td>{{ row['Average Points'] }}</td>
-                <td>{{ row['Positions'] }}</td>
-                <td>{{ row['Total Combined Points'] }}</td>
-                <td>{{ row['Total MIN Points'] }}</td>
-                <td>{{ row['Total GL Points'] }}</td>
-                <td>{{ row['Total ASS Points'] }}</td>
-                <td>{{ row['Total YC Points'] }}</td>
-                <td>{{ row['Total RC Points'] }}</td>
-                <td>{{ row['Total GC Points'] }}</td>
-                <td>{{ row['Total CS Points'] }}</td>
-                <td>{{ row['Total GS Points'] }}</td>
-                <td>{{ row['Total PS Points'] }}</td>
-                <td>{{ row['Total PM Points'] }}</td>
-                <td>{{ row['Total OG Points'] }}</td>
-                <td>{{ row['Total SGS Points'] }}</td>
-                <td>{{ row['Total FS Points'] }}</td>
-                <td>{{ row['Total KP Points'] }}</td>
-                <td>{{ row['Total CRS Points'] }}</td>
-                <td>{{ row['Total CL Points'] }}</td>
-                <td>{{ row['Total WF Points'] }}</td>
-                <td>{{ row['Total PSS Points'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
+
+<style>
+.player-name-cell {
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+.cost-cell {
+    font-weight: 600;
+    color: var(--success-color);
+}
+
+.position-cell {
+    font-size: 0.85rem;
+    color: var(--light-text);
+}
+
+.combined-pts {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.table-actions .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .table-actions {
+        justify-content: center;
+    }
+    
+    .table-actions .btn {
+        flex: 1;
+        min-width: 80px;
+    }
+}
+</style>
