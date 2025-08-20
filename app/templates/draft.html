@@ -619,6 +619,36 @@
     font-size: 0.75rem;
 }
 
+.player-table thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition);
+}
+
+.player-table thead th.sortable:hover {
+    background: var(--light-green);
+}
+
+.sort-indicator {
+    margin-left: 4px;
+    font-size: 10px;
+}
+
+.sort-indicator::after {
+    content: '↕';
+    opacity: 0.5;
+}
+
+.sort-indicator.asc::after {
+    content: '↑';
+    opacity: 1;
+}
+
+.sort-indicator.desc::after {
+    content: '↓';
+    opacity: 1;
+}
+
 .player-table tbody tr {
     cursor: pointer;
     transition: var(--transition);
@@ -984,11 +1014,13 @@
                         <table class="player-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                    <th class="sortable" data-sort="name">Name <span class="sort-indicator"></span></th>
                                     <th>Team</th>
                                     <th>Pos</th>
                                     <th>Cost</th>
-                                    <th>Pts</th>
+                                    <th class="sortable" data-sort="points">Pts <span class="sort-indicator"></span></th>
+                                    <th class="sortable" data-sort="average">Avg <span class="sort-indicator"></span></th>
+                                    <th class="sortable" data-sort="high">High <span class="sort-indicator"></span></th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -1081,6 +1113,8 @@ class DraftManager {
         this.pitchPlayers = [];
         this.benchPlayers = [];
         this.selectedPlayer = null;
+        this.currentSort = { column: null, direction: 'asc' };
+        this.originalPlayersData = [...playersData];
         this.formations = [
             { name: '3-5-2', pitch: { gk: 1, def: 3, mid: 5, fwd: 2 }, bench: { gk: 1, def: 2, mid: 0, fwd: 1 } },
             { name: '3-4-3', pitch: { gk: 1, def: 3, mid: 4, fwd: 3 }, bench: { gk: 1, def: 2, mid: 1, fwd: 0 } },
@@ -1098,6 +1132,81 @@ class DraftManager {
         this.bindEvents();
         this.updateTeamSummary();
         this.populateTeamFilter();
+        this.initializeSorting();
+    }
+
+    initializeSorting() {
+        const sortableHeaders = document.querySelectorAll('th.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const sortColumn = header.dataset.sort;
+                this.sortTable(sortColumn);
+            });
+        });
+    }
+
+    sortTable(column) {
+        // Toggle direction if same column, otherwise default to descending for numeric columns
+        if (this.currentSort.column === column) {
+            this.currentSort.direction = this.currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.currentSort.direction = (column === 'name') ? 'asc' : 'desc';
+        }
+        this.currentSort.column = column;
+
+        // Sort the data
+        playersData.sort((a, b) => {
+            let valueA, valueB;
+            
+            switch(column) {
+                case 'name':
+                    valueA = (a['Name'] || '').toLowerCase();
+                    valueB = (b['Name'] || '').toLowerCase();
+                    break;
+                case 'points':
+                    valueA = parseFloat(a['Total Points'] || 0);
+                    valueB = parseFloat(b['Total Points'] || 0);
+                    break;
+                case 'average':
+                    valueA = parseFloat(a['Average Points'] || 0);
+                    valueB = parseFloat(b['Average Points'] || 0);
+                    break;
+                case 'high':
+                    valueA = parseFloat(a['High Score'] || 0);
+                    valueB = parseFloat(b['High Score'] || 0);
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (this.currentSort.direction === 'asc') {
+                return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+            } else {
+                return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+            }
+        });
+
+        // Update sort indicators
+        this.updateSortIndicators();
+        
+        // Re-render table with current filters
+        this.initializeTable();
+        this.filterPlayers();
+    }
+
+    updateSortIndicators() {
+        // Clear all indicators
+        document.querySelectorAll('.sort-indicator').forEach(indicator => {
+            indicator.className = 'sort-indicator';
+        });
+
+        // Set current sort indicator
+        if (this.currentSort.column) {
+            const currentHeader = document.querySelector(`th[data-sort="${this.currentSort.column}"] .sort-indicator`);
+            if (currentHeader) {
+                currentHeader.className = `sort-indicator ${this.currentSort.direction}`;
+            }
+        }
     }
 
     initializeTable() {
@@ -1119,6 +1228,8 @@ class DraftManager {
                 <td>${this.getPositionShort(player['Positions'] || '')}</td>
                 <td style="color: var(--success-green); font-weight: 600;">${player['Cost'] || '$0.0M'}</td>
                 <td style="font-weight: 600;">${player['Total Points'] || 0}</td>
+                <td style="font-weight: 600;">${player['Average Points'] || 0}</td>
+                <td style="font-weight: 600;">${player['High Score'] || 0}</td>
                 <td><button class="add-player-btn" onclick="draft.addPlayer(${index})">Add</button></td>
             `;
             

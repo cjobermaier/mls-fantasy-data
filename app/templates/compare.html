@@ -622,7 +622,9 @@ function displayComparison(data) {
         // Stat name
         const statCell = document.createElement('td');
         statCell.className = 'stat-column';
-        statCell.textContent = stat;
+        // Use display name if available, otherwise use the original stat name
+        const displayName = data.stat_display_names ? data.stat_display_names[stat] || stat : stat;
+        statCell.textContent = displayName;
         row.appendChild(statCell);
         
         // Player values

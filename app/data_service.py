@@ -112,7 +112,7 @@ def compare_players(player_ids):
     if len(players) < 1:
         return {'error': 'No valid players found for comparison'}
     
-    # Define comparison stats
+    # Define comparison stats with display names
     comparison_stats = [
         'Cost', 'Total Points', 'Average Points', 'Owned By',
         'Total Combined Points', 'Total GL Points', 'Total ASS Points',
@@ -120,9 +120,27 @@ def compare_players(player_ids):
         'Total MIN Points', 'Total KP Points', 'Total CRS Points'
     ]
     
+    # Map abbreviated column names to display names
+    stat_display_names = {
+        'Cost': 'Cost',
+        'Total Points': 'Total Points',
+        'Average Points': 'Average Points',
+        'Owned By': 'Owned By',
+        'Total Combined Points': 'Combined Points',
+        'Total GL Points': 'Goals',
+        'Total ASS Points': 'Assists',
+        'Total YC Points': 'Yellow Cards',
+        'Total RC Points': 'Red Cards',
+        'Total CS Points': 'Clean Sheets',
+        'Total MIN Points': 'Minutes Played',
+        'Total KP Points': 'Key Passes',
+        'Total CRS Points': 'Crosses'
+    }
+    
     comparison_data = {
         'players': players,
         'stats': comparison_stats,
+        'stat_display_names': stat_display_names,
         'winner_stats': {}
     }
     
