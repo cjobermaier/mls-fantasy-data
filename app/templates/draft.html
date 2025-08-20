@@ -767,6 +767,54 @@
     padding: 25px;
 }
 
+.saved-team-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+}
+
+.saved-team-item:hover {
+    background: #f0f0f0;
+}
+
+.team-info h6 {
+    margin: 0;
+    color: var(--dark-text);
+}
+
+.team-actions .btn {
+    margin-left: 5px;
+}
+
+.slot-info {
+    text-align: center;
+}
+
+.slot-info small {
+    font-size: 0.75em;
+    line-height: 1.2;
+}
+
+.existing-save-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+.existing-save-item:hover {
+    background: #e9ecef;
+}
+
 /* Responsive design */
 @media (max-width: 1200px) {
     .draft-content {
@@ -911,16 +959,8 @@
                         Team Management
                     </h2>
                     <div class="formation-controls">
-                        <select id="formationSelect" class="formation-select">
-                            <option value="0">3-5-2</option>
-                            <option value="1">3-4-3</option>
-                            <option value="2">4-5-1</option>
-                            <option value="3" selected>4-4-2</option>
-                            <option value="4">4-3-3</option>
-                            <option value="5">5-4-1</option>
-                            <option value="6">5-3-2</option>
-                        </select>
                         <div class="formation-display" id="formationDisplay">4-4-2</div>
+                        <small class="text-muted">Formation adapts to your player swaps</small>
                     </div>
                 </div>
 
@@ -1383,6 +1423,7 @@ class DraftManager {
         
         this.updateTeamSummary();
         this.updatePlayerRowState(index, true);
+        this.updateFormationDisplay();
     }
 
     findAvailableSlot(position, location) {
@@ -1553,6 +1594,7 @@ class DraftManager {
         }
         
         this.updateTeamSummary();
+        this.updateFormationDisplay();
     }
     
     isSwapValid(player1, player2) {
@@ -1748,6 +1790,7 @@ class DraftManager {
         selectedPlayers.splice(playerIndex, 1);
         this.updateTeamSummary();
         this.updatePlayerRowState(index, false);
+        this.updateFormationDisplay();
     }
     
     canRemovePlayerFromPitch(playerToRemove) {
@@ -1894,11 +1937,41 @@ class DraftManager {
     }
 
     updateSaveModal() {
-        // Implementation for updating save modal
+        const savedTeams = this.getSavedTeams();
         const saveSlotBtns = document.querySelectorAll('.save-slot-btn');
+        
+        // Update slot appearance based on whether they're occupied
         saveSlotBtns.forEach(btn => {
+            const slot = btn.dataset.slot;
+            const existingTeam = savedTeams[slot];
+            
+            // Remove any existing event listeners
+            btn.replaceWith(btn.cloneNode(true));
+        });
+        
+        // Re-query after replacing nodes
+        const updatedSaveSlotBtns = document.querySelectorAll('.save-slot-btn');
+        updatedSaveSlotBtns.forEach(btn => {
+            const slot = btn.dataset.slot;
+            const existingTeam = savedTeams[slot];
+            
+            if (existingTeam) {
+                // Slot is occupied
+                btn.className = 'btn btn-warning w-100 save-slot-btn';
+                btn.innerHTML = `
+                    <div class="slot-info">
+                        <strong>Slot ${slot} - OCCUPIED</strong>
+                        <small class="d-block">${existingTeam.name}</small>
+                        <small class="d-block text-muted">${existingTeam.formation} • ${new Date(existingTeam.timestamp).toLocaleDateString()}</small>
+                    </div>
+                `;
+            } else {
+                // Slot is empty
+                btn.className = 'btn btn-outline-primary w-100 save-slot-btn';
+                btn.innerHTML = `Slot ${slot} - EMPTY`;
+            }
+            
             btn.addEventListener('click', () => {
-                const slot = btn.dataset.slot;
                 const teamName = document.getElementById('teamName').value.trim();
                 
                 if (!teamName) {
@@ -1906,26 +1979,188 @@ class DraftManager {
                     return;
                 }
                 
+                // Check if slot is occupied and confirm overwrite
+                if (existingTeam) {
+                    const confirmOverwrite = confirm(`Slot ${slot} already contains "${existingTeam.name}".\n\nDo you want to overwrite it with "${teamName}"?`);
+                    if (!confirmOverwrite) {
+                        return;
+                    }
+                }
+                
                 this.saveTeamToSlot(slot, teamName);
             });
         });
+        
+        // Update the saved teams display section
+        this.updateSavedTeamsDisplay();
+    }
+    
+    updateSavedTeamsDisplay() {
+        const savedTeamsContainer = document.getElementById('savedTeams');
+        const savedTeams = this.getSavedTeams();
+        
+        if (Object.keys(savedTeams).length === 0) {
+            savedTeamsContainer.innerHTML = '<p class="text-muted text-center">No saved teams yet.</p>';
+            return;
+        }
+        
+        let html = '<h6>Existing Saves:</h6>';
+        Object.entries(savedTeams).forEach(([slot, teamData]) => {
+            html += `
+                <div class="existing-save-item">
+                    <span><strong>Slot ${slot}:</strong> ${teamData.name} (${teamData.formation})</span>
+                    <button class="btn btn-sm btn-outline-danger" onclick="draft.deleteTeamFromSlot('${slot}'); draft.updateSaveModal();">Delete</button>
+                </div>
+            `;
+        });
+        
+        savedTeamsContainer.innerHTML = html;
     }
 
     updateLoadModal() {
-        // Implementation for updating load modal
         const loadTeamsList = document.getElementById('loadTeamsList');
-        loadTeamsList.innerHTML = '<p class="text-muted text-center py-4">No saved teams found.</p>';
+        const savedTeams = this.getSavedTeams();
+        
+        if (Object.keys(savedTeams).length === 0) {
+            loadTeamsList.innerHTML = '<p class="text-muted text-center py-4">No saved teams found.</p>';
+            return;
+        }
+        
+        let html = '';
+        Object.entries(savedTeams).forEach(([slot, teamData]) => {
+            html += `
+                <div class="saved-team-item">
+                    <div class="team-info">
+                        <h6>${teamData.name}</h6>
+                        <small class="text-muted">
+                            ${teamData.players.length} players • 
+                            Formation: ${teamData.formation} • 
+                            Saved: ${new Date(teamData.timestamp).toLocaleDateString()}
+                        </small>
+                    </div>
+                    <div class="team-actions">
+                        <button class="btn btn-sm btn-primary" onclick="draft.loadTeamFromSlot('${slot}')">Load</button>
+                        <button class="btn btn-sm btn-danger" onclick="draft.deleteTeamFromSlot('${slot}')">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+            <div class="mt-3 text-center">
+                <button class="btn btn-sm btn-outline-danger" onclick="draft.clearAllSaves()">Clear All</button>
+            </div>
+        `;
+        
+        loadTeamsList.innerHTML = html;
     }
 
     saveTeamToSlot(slot, teamName) {
-        // Save implementation
-        alert(`Team "${teamName}" saved to slot ${slot}!`);
-        this.closeSaveModal();
+        try {
+            const savedTeams = this.getSavedTeams();
+            
+            // Create team data to save
+            const teamData = {
+                name: teamName,
+                formation: this.currentFormation.name,
+                players: selectedPlayers.map(player => ({
+                    index: player.index,
+                    name: player['Name'],
+                    position: player.position,
+                    location: player.location,
+                    cost: player.cost,
+                    id: player.id
+                })),
+                usedBudget: usedBudget,
+                totalBudget: totalBudget,
+                timestamp: new Date().toISOString(),
+                slot: slot
+            };
+            
+            // Save to localStorage
+            savedTeams[slot] = teamData;
+            localStorage.setItem('draftSavedTeams', JSON.stringify(savedTeams));
+            
+            alert(`Team "${teamName}" saved successfully!`);
+            this.closeSaveModal();
+            
+        } catch (error) {
+            alert('Error saving team. Please try again.');
+            console.error('Save error:', error);
+        }
     }
 
     getSavedTeams() {
         const saved = localStorage.getItem('draftSavedTeams');
         return saved ? JSON.parse(saved) : {};
+    }
+
+    loadTeamFromSlot(slot) {
+        try {
+            const savedTeams = this.getSavedTeams();
+            const teamData = savedTeams[slot];
+            
+            if (!teamData) {
+                alert('Team not found!');
+                return;
+            }
+            
+            // Clear current team without confirmation
+            selectedPlayers.forEach(player => {
+                if (player.slotElement) {
+                    this.removePlayerFromSlot(player.slotElement);
+                }
+                this.updatePlayerRowState(player.index, false);
+            });
+            
+            selectedPlayers = [];
+            usedBudget = 0;
+            this.updateTeamSummary();
+            
+            // Set formation
+            const formationIndex = this.formations.findIndex(f => f.name === teamData.formation);
+            if (formationIndex !== -1) {
+                this.currentFormation = this.formations[formationIndex];
+                document.getElementById('formationDisplay').textContent = this.currentFormation.name;
+                this.createFormation();
+                this.createBenchSlots();
+            }
+            
+            // Load players
+            teamData.players.forEach(playerData => {
+                this.addPlayer(playerData.index);
+            });
+            
+            // Update budget
+            usedBudget = teamData.usedBudget;
+            totalBudget = teamData.totalBudget;
+            document.getElementById('budgetInput').value = totalBudget;
+            
+            this.updateTeamSummary();
+            this.updateFormationDisplay();
+            
+            alert(`Team "${teamData.name}" loaded successfully!`);
+            this.closeLoadModal();
+            
+        } catch (error) {
+            alert('Error loading team. Please try again.');
+            console.error('Load error:', error);
+        }
+    }
+    
+    deleteTeamFromSlot(slot) {
+        if (confirm('Are you sure you want to delete this saved team?')) {
+            try {
+                const savedTeams = this.getSavedTeams();
+                delete savedTeams[slot];
+                localStorage.setItem('draftSavedTeams', JSON.stringify(savedTeams));
+                this.updateLoadModal();
+                alert('Team deleted successfully!');
+            } catch (error) {
+                alert('Error deleting team. Please try again.');
+                console.error('Delete error:', error);
+            }
+        }
     }
 
     clearAllSaves() {
@@ -2018,6 +2253,45 @@ class DraftManager {
         } else {
             alert(`Auto-fill completed with ${selectedForAutoFill.length} players due to budget constraints. Consider increasing your budget or manually selecting cheaper players.`);
         }
+    }
+
+    updateFormationDisplay() {
+        // Count players by position on pitch
+        const pitchPlayers = selectedPlayers.filter(p => p.location === 'pitch');
+        const positionCounts = {
+            goalkeeper: pitchPlayers.filter(p => p.position === 'goalkeeper').length,
+            defender: pitchPlayers.filter(p => p.position === 'defender').length,
+            midfielder: pitchPlayers.filter(p => p.position === 'midfielder').length,
+            forward: pitchPlayers.filter(p => p.position === 'forward').length
+        };
+        
+        // Determine formation based on current pitch composition
+        let detectedFormation = '4-4-2'; // Default
+        
+        if (pitchPlayers.length === 11) {
+            const def = positionCounts.defender;
+            const mid = positionCounts.midfielder;
+            const fwd = positionCounts.forward;
+            
+            // Map common formations
+            if (def === 3 && mid === 5 && fwd === 2) detectedFormation = '3-5-2';
+            else if (def === 3 && mid === 4 && fwd === 3) detectedFormation = '3-4-3';
+            else if (def === 4 && mid === 5 && fwd === 1) detectedFormation = '4-5-1';
+            else if (def === 4 && mid === 4 && fwd === 2) detectedFormation = '4-4-2';
+            else if (def === 4 && mid === 3 && fwd === 3) detectedFormation = '4-3-3';
+            else if (def === 5 && mid === 4 && fwd === 1) detectedFormation = '5-4-1';
+            else if (def === 5 && mid === 3 && fwd === 2) detectedFormation = '5-3-2';
+            else {
+                // Custom formation - show actual counts
+                detectedFormation = `${def}-${mid}-${fwd}`;
+            }
+        } else {
+            // Incomplete team
+            detectedFormation = `Building... (${pitchPlayers.length}/11)`;
+        }
+        
+        // Update display
+        document.getElementById('formationDisplay').textContent = detectedFormation;
     }
 
     populateTeamFilter() {
@@ -2114,9 +2388,7 @@ class DraftManager {
             window.location.href = url.toString();
         });
 
-        document.getElementById('formationSelect').addEventListener('change', (e) => {
-            this.changeFormation(parseInt(e.target.value));
-        });
+        // Formation dropdown removed - formation adapts automatically to player swaps
         
         document.getElementById('playerSearch').addEventListener('input', () => this.filterPlayers());
         document.getElementById('positionFilter').addEventListener('change', () => this.filterPlayers());
